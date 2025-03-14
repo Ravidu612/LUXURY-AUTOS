@@ -1,200 +1,122 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import { Card, CardContent, CardMedia, Typography, Button, Grid, TextField, Select, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import Header from '../Navbar/Navbar';
-import Footer from '../Footer/Footer';
-import { Container, Typography, CircularProgress, Card, CardMedia, CardContent, TextField } from '@mui/material';
-import { Link } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
+import React from 'react';
 
-const URL = "http://localhost:4000/Vehicles";
+const VehiclePage = () => {
+    const [vehicles, setVehicles] = useState([
+        { id: 1, image: "Link", name: "Allion 240", type: "car", fuel: "Petrol", seats: "4", transmission: "Manual", price: 100, status: "Available", ownerID: "U002" },
+        { id: 2, image: "Link", name: "Aqua", type: "car", fuel: "Petrol", seats: "4", transmission: "Manual", price: 100, status: "Available", ownerID: "U002" },
+        { id: 3, image: "Link", name: "Axio", type: "car", fuel: "Petrol", seats: "4", transmission: "Manual", price: 100, status: "Available", ownerID: "U002" }
+    ]);
+    const [search, setSearch] = useState("");
+    const [filterType, setFilterType] = useState("");
+    const [filterTransmission, setFilterTransmission] = useState("");
+    const [filterFuel, setFilterFuel] = useState("");
+    const [selectedVehicle, setSelectedVehicle] = useState(null);
+    const [openForm, setOpenForm] = useState(false);
+    const [newVehicle, setNewVehicle] = useState({ name: "", type: "", fuel: "", seats: "", transmission: "", price: "", image: "" });
+    
+    const handleSearchChange = (e) => setSearch(e.target.value);
+    const handleFilterChange = (setter) => (e) => setter(e.target.value);
+    const handleCardClick = (vehicle) => setSelectedVehicle(vehicle);
+    const handleCloseDialog = () => setSelectedVehicle(null);
+    
+    const handleAvailabilityToggle = (id) => {
+        setVehicles(vehicles.map(v => v.id === id ? { ...v, status: v.status === "Available" ? "Unavailable" : "Available" } : v));
+    };
 
-const fetchVehicles = async () => {
-  try {
-    const response = await axios.get(URL);
-    return Array.isArray(response.data) ? response.data : [response.data];
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    throw error;
-  }
-};
+    const handleDelete = (id) => {
+        setVehicles(vehicles.filter(v => v.id !== id));
+    };
 
-function VehiclePage() {
-  const [Vehicles, setVehicles] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState(''); // State for search query
-  const [filteredVehicles, setFilteredVehicles] = useState([]); // State for filtered Vehicles
-
-  useEffect(() => {
-    fetchVehicles().then(data => {
-      setVehicles(data);
-      setFilteredVehicles(data); // Initialize with all Vehicles
-      setLoading(false);
-    }).catch(error => {
-      console.error("Error fetching Vehicles:", error);
-      setLoading(false);
-    });
-  }, []);
-
-  // Function to handle search input change
-  const handleSearchChange = (event) => {
-    const query = event.target.value.toLowerCase();
-    setSearchQuery(query);
-
-    const filtered = Vehicles.filter((Vehicle) =>
-      // Match only when the first letter of the name or status matches the query
-      Vehicle.name.toLowerCase().startsWith(query) ||
-      Vehicle.status.toLowerCase().startsWith(query)
+    const handleAddVehicle = () => {
+        setVehicles([...vehicles, { id: vehicles.length + 1, ...newVehicle, status: "Available" }]);
+        setOpenForm(false);
+        setNewVehicle({ name: "", type: "", fuel: "", seats: "", transmission: "", price: "", image: "" });
+    };
+    
+    const filteredVehicles = vehicles.filter(v =>
+        v.name.toLowerCase().includes(search.toLowerCase()) &&
+        (filterType ? v.type === filterType : true) &&
+        (filterTransmission ? v.transmission === filterTransmission : true) &&
+        (filterFuel ? v.fuel === filterFuel : true)
     );
-
-    setFilteredVehicles(filtered);
-  };
-
-  return (
-    <div style={{ backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
-      <Header />
-
-      {/* Search Bar Section */}
-      <Container sx={{ padding: '20px 0' }}>
-        <TextField
-          fullWidth
-          label="Search Vehicles"
-          variant="outlined"
-          value={searchQuery}
-          onChange={handleSearchChange}
-          sx={{ marginBottom: '20px' }}
-        />
+    
+    return (
+      <Container>
+        <Header />
+        <div>
+            <TextField label="Search" variant="outlined" fullWidth onChange={handleSearchChange} />
+            <Select value={filterType} onChange={handleFilterChange(setFilterType)}>
+                <MenuItem value="">All Types</MenuItem>
+                <MenuItem value="car">Car</MenuItem>
+            </Select>
+            <Select value={filterTransmission} onChange={handleFilterChange(setFilterTransmission)}>
+                <MenuItem value="">All Transmissions</MenuItem>
+                <MenuItem value="Manual">Manual</MenuItem>
+            </Select>
+            <Select value={filterFuel} onChange={handleFilterChange(setFilterFuel)}>
+                <MenuItem value="">All Fuels</MenuItem>
+                <MenuItem value="Petrol">Petrol</MenuItem>
+            </Select>
+            <Button variant="contained" color="primary" onClick={() => setOpenForm(true)}>Add Vehicle</Button>
+            <Grid container spacing={2}>
+                {filteredVehicles.map((vehicle) => (
+                    <Grid item xs={12} sm={6} md={4} key={vehicle.id}>
+                        <Card onClick={() => handleCardClick(vehicle)}>
+                            <CardMedia component="img" height="140" image={vehicle.image} alt={vehicle.name} />
+                            <CardContent>
+                                <Typography variant="h6">{vehicle.name}</Typography>
+                                <Typography>{vehicle.type} - {vehicle.transmission}</Typography>
+                                <Typography>Status: {vehicle.status}</Typography>
+                                <Button onClick={(e) => { e.stopPropagation(); handleAvailabilityToggle(vehicle.id); }}>
+                                    Toggle Availability
+                                </Button>
+                                <Button color="secondary" onClick={(e) => { e.stopPropagation(); handleDelete(vehicle.id); }}>
+                                    Delete
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                ))}
+            </Grid>
+            {selectedVehicle && (
+                <Dialog open={Boolean(selectedVehicle)} onClose={handleCloseDialog}>
+                    <DialogTitle>{selectedVehicle.name}</DialogTitle>
+                    <DialogContent>
+                        <Typography>Type: {selectedVehicle.type}</Typography>
+                        <Typography>Fuel: {selectedVehicle.fuel}</Typography>
+                        <Typography>Seats: {selectedVehicle.seats}</Typography>
+                        <Typography>Transmission: {selectedVehicle.transmission}</Typography>
+                        <Typography>Price: {selectedVehicle.price}</Typography>
+                        <Typography>Status: {selectedVehicle.status}</Typography>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseDialog}>Close</Button>
+                    </DialogActions>
+                </Dialog>
+            )}
+            <Dialog open={openForm} onClose={() => setOpenForm(false)}>
+                <DialogTitle>Add New Vehicle</DialogTitle>
+                <DialogContent>
+                    <TextField label="Name" fullWidth onChange={(e) => setNewVehicle({ ...newVehicle, name: e.target.value })} />
+                    <TextField label="Type" fullWidth onChange={(e) => setNewVehicle({ ...newVehicle, type: e.target.value })} />
+                    <TextField label="Fuel" fullWidth onChange={(e) => setNewVehicle({ ...newVehicle, fuel: e.target.value })} />
+                    <TextField label="Seats" fullWidth onChange={(e) => setNewVehicle({ ...newVehicle, seats: e.target.value })} />
+                    <TextField label="Transmission" fullWidth onChange={(e) => setNewVehicle({ ...newVehicle, transmission: e.target.value })} />
+                    <TextField label="Price" fullWidth onChange={(e) => setNewVehicle({ ...newVehicle, price: e.target.value })} />
+                    <TextField label="Image URL" fullWidth onChange={(e) => setNewVehicle({ ...newVehicle, image: e.target.value })} />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenForm(false)}>Cancel</Button>
+                    <Button onClick={handleAddVehicle} color="primary">Add</Button>
+                </DialogActions>
+            </Dialog>
+        </div>
       </Container>
-
-      <Container sx={{ padding: '40px 0' }}>
-        {/* Now Showing Section */}
-        <Typography variant="h4" align="left" gutterBottom sx={{ marginBottom: '20px', fontWeight: 'bold' }}>
-          Now Showing!
-        </Typography>
-
-        {loading ? (
-          <CircularProgress sx={{ display: 'block', margin: 'auto', marginTop: '40px' }} />
-        ) : (
-          <Swiper
-            spaceBetween={20}
-            slidesPerView={4}
-            pagination={{ clickable: true }}
-            breakpoints={{
-              320: { slidesPerView: 1 },
-              600: { slidesPerView: 2 },
-              960: { slidesPerView: 3 },
-              1280: { slidesPerView: 4 }
-            }}
-            style={{ padding: '20px 0' }} // Added padding for Swiper for better spacing
-          >
-            {filteredVehicles
-              .filter(item => item.status === 'available') // Filter for available Vehicles
-              .map(item => (
-                <SwiperSlide key={item._id}>
-                  <Card
-                    sx={{
-                      width: '240px', // Fixed width for consistency
-                      height: '400px', // Fixed height to maintain uniformity
-                      boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-                      transition: 'transform 0.2s',
-                      '&:hover': {
-                        transform: 'scale(1.05)',
-                      },
-                      margin: '0 auto' // Center cards inside Swiper
-                    }}
-                  >
-                    <Link to={`/Vehicles/${item._id}`} style={{ textDecoration: 'none' }}>
-                      <CardMedia
-                        component="img"
-                        alt={item.name}
-                        height="300" // Fixed height for the image
-                        image={item.image || 'http://localhost:5173/src/Components/Images/3.png'}
-                        title={item.name}
-                        sx={{ objectFit: 'cover' }} // Ensure image is contained within fixed size
-                      />
-                      <CardContent>
-                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', fontSize: '16px', textAlign: 'center' }}>
-                          {item.name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '14px', textAlign: 'center' }}>
-                          IMDB Rate: {item.rate}
-                        </Typography>
-                      </CardContent>
-                    </Link>
-                  </Card>
-                </SwiperSlide>
-              ))}
-          </Swiper>
-        )}
-      </Container>
-
-      {/* Upcoming Vehicles Section */}
-      <Container sx={{ padding: '40px 0' }}>
-        <Typography variant="h4" align="left" gutterBottom sx={{ marginBottom: '20px', fontWeight: 'bold' }}>
-          Upcoming Vehicles
-        </Typography>
-
-        {loading ? (
-          <CircularProgress sx={{ display: 'block', margin: 'auto', marginTop: '40px' }} />
-        ) : (
-          <Swiper
-            spaceBetween={20}
-            slidesPerView={4}
-            pagination={{ clickable: true }}
-            breakpoints={{
-              320: { slidesPerView: 1 },
-              600: { slidesPerView: 2 },
-              960: { slidesPerView: 3 },
-              1280: { slidesPerView: 4 }
-            }}
-            style={{ padding: '20px 0' }}
-          >
-            {Vehicles
-              .filter(item => item.status === 'Up Coming!') // Filter for upcoming Vehicles
-              .map(item => (
-                <SwiperSlide key={item._id}>
-                  <Card
-                    sx={{
-                      width: '240px',
-                      height: '400px',
-                      boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-                      transition: 'transform 0.2s',
-                      '&:hover': {
-                        transform: 'scale(1.05)',
-                      },
-                      margin: '0 auto'
-                    }}
-                  >
-                    <Link to={`/Vehicles/${item._id}`} style={{ textDecoration: 'none' }}>
-                      <CardMedia
-                        component="img"
-                        alt={item.name}
-                        height="300"
-                        image={item.image || 'http://localhost:5173/src/Components/Images/3.png'}
-                        title={item.name}
-                        sx={{ objectFit: 'cover' }}
-                      />
-                      <CardContent>
-                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', fontSize: '16px', textAlign: 'center' }}>
-                          {item.name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '14px', textAlign: 'center' }}>
-                          IMDB Rate: {item.rate}
-                        </Typography>
-                      </CardContent>
-                    </Link>
-                  </Card>
-                </SwiperSlide>
-              ))}
-          </Swiper>
-        )}
-      </Container>
-
-      <Footer />
-    </div>
-  );
-}
+        
+    );
+};
 
 export default VehiclePage;
