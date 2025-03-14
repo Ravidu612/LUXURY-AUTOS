@@ -41,7 +41,7 @@ function AddUser({ onBack }) {
         // Notify user of successful addition
         alert('User added successfully');
         // Redirect to the UserDetails page
-        navigate('/admindashboard/user-management');
+        navigate('/user-list/user-management');
       }
     } catch (error) {
       setError(error.response ? error.response.data.message : 'An error occurred');
@@ -105,6 +105,8 @@ function AddUser({ onBack }) {
           >
             <MenuItem value="user">User</MenuItem>
             <MenuItem value="admin">Admin</MenuItem>
+            <MenuItem value="customer">Customer</MenuItem>
+            <MenuItem value="owner">Owner</MenuItem>
           </Select>
         </FormControl>
         <Button

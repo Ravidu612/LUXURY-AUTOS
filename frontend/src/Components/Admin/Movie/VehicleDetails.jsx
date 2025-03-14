@@ -1,291 +1,124 @@
-/* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Paper, IconButton, Typography, ToggleButton, ToggleButtonGroup } from '@mui/material';
-import { Edit, Delete, Print, Add } from '@mui/icons-material';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-import AddVehicle from './AddVehicle';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import {
+    Card, CardContent, CardMedia, Typography, Grid, Container,
+    TextField, Select, MenuItem, Button, Dialog, DialogTitle, DialogContent,
+    DialogActions, Box
+} from "@mui/material";
+import { vehicles as initialVehicles } from "../../Admin/Database/Data";
 
-const URL = "http://localhost:4000/Vehicles";
+const VehicleDetails = () => {
+    const [vehicles, setVehicles] = useState(initialVehicles);
+    const [search, setSearch] = useState("");
+    const [filterType, setFilterType] = useState("");
+    const [open, setOpen] = useState(false);
+    const [editingVehicle, setEditingVehicle] = useState(null);
 
-const fetchVehicle = async () => {
-  try {
-    const response = await axios.get(URL);
-    return Array.isArray(response.data) ? response.data : [response.data];
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    throw error;
-  }
-};
+    const handleDelete = (id) => {
+        setVehicles(vehicles.filter(vehicle => vehicle.id !== id));
+    };
 
-function VehicleDetails() {
-  const [Vehicle, setVehicle] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [noResults, setNoResults] = useState(false);
-  const [showAddVehicleForm, setShowAddVehicleForm] = useState(false);
-  const [view, setView] = useState('table'); // Toggle between 'table' and 'stats' view
+    const toggleAvailability = (id) => {
+        setVehicles(vehicles.map(vehicle => vehicle.id === id ? { ...vehicle, status: vehicle.status === "Available" ? "Unavailable" : "Available" } : vehicle));
+    };
 
-  const navigate = useNavigate();
+    const handleEdit = (vehicle) => {
+        setEditingVehicle(vehicle);
+        setOpen(true);
+    };
 
-  useEffect(() => {
-    fetchVehicle().then(data => {
-      setVehicle(data);
-    }).catch(error => {
-      console.error("Error fetching Vehicle:", error);
-    });
-  }, []);
+    const handleClose = () => {
+        setOpen(false);
+        setEditingVehicle(null);
+    };
 
-  const handleEdit = (id) => {
-    navigate(`/admindashboard/update-Vehicle/${id}`);
-  };
+    const handleSave = () => {
+        setVehicles(vehicles.map(vehicle => vehicle.id === editingVehicle.id ? editingVehicle : vehicle));
+        handleClose();
+    };
 
-  const deleteVehicle = async (id) => {
-    try {
-      const response = await axios.delete(`${URL}/${id}`);
-      if (response.status === 200) {
-        setVehicle(prev => prev.filter(item => item._id !== id));
-      } else {
-        console.error("Unexpected response status:", response.status);
-      }
-    } catch (error) {
-      console.error("Error deleting Vehicle:", error.response ? error.response.data : error.message);
-    }
-  };
+    const handleChange = (e) => {
+        setEditingVehicle({ ...editingVehicle, [e.target.name]: e.target.value });
+    };
 
-  const handlePDF = () => {
-    const doc = new jsPDF();
-    
-    // Add the main topic as the title
-    doc.setFontSize(18);
-    doc.text("LUXURY AUTOS ", 10, 10);
-    
-    // Add a subtitle or description if needed
-    doc.setFontSize(12);
-    doc.text("Vehicle Details Report", 10, 20);
-
-    doc.autoTable({
-      head: [['Vehicle ID', 'Name', 'Fuel', 'Seating', 'Transmission', 'Price', 'Rate', 'Description', 'Status']],
-      body: Vehicle.map(item => [
-        item.VID, 
-        item.name, 
-        item.fuel, 
-        item.seating, 
-        item.transmission, 
-        item.price, 
-        item.rate, 
-        item.description, 
-        item.status
-      ]),
-      startY: 30, // Adjust the starting position to leave space for the title
-      margin: { top: 20 },
-      styles: {
-        overflow: 'linebreak',
-        fontSize: 10,
-      },
-      headStyles: {
-        fillColor: [0, 0, 0],
-        textColor: [255, 255, 255],
-      },
-    });
-
-    doc.save('Vehicle-details.pdf');
-  };
-
-  const handleSearch = (e) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-
-    if (query.trim() === "") {
-      fetchVehicle().then(data => {
-        setVehicle(data);
-        setNoResults(false);
-      }).catch(error => {
-        console.error("Error fetching Vehicle:", error);
-      });
-      return;
-    }
-
-    const filteredVehicle = Vehicle.filter(item =>
-      Object.values(item).some(field =>
-        field && field.toString().toLowerCase().includes(query.toLowerCase())
-      )
+    const filteredVehicles = vehicles.filter(vehicle =>
+        vehicle.name.toLowerCase().includes(search.toLowerCase()) &&
+        (filterType ? vehicle.type === filterType : true)
     );
-    setVehicle(filteredVehicle);
-    setNoResults(filteredVehicle.length === 0);
-  };
 
-  const handleAddVehicle = () => {
-    setShowAddVehicleForm(true);
-  };
-
-  const handleBack = () => {
-    setShowAddVehicleForm(false);
-  };
-
-  // Calculate statistics
-  const totalVehicles = Vehicle.length;
-  const averageRating = totalVehicles > 0 ? (Vehicle.reduce((acc, item) => acc + item.rate, 0) / totalVehicles) : 0;
-  const statusDistribution = Vehicle.reduce((acc, item) => {
-    acc[item.status] = (acc[item.status] || 0) + 1;
-    return acc;
-  }, {});
-
-  // Render the statistics view
-  const renderStatsView = () => (
-    <Box sx={{ padding: 3, backgroundColor: 'white', borderRadius: 1 }}>
-      <Typography variant="h5" gutterBottom>Total Vehicles: {totalVehicles}</Typography>
-      <Typography variant="h6" gutterBottom>Average Rating: {averageRating.toFixed(2)}</Typography>
-      <Typography variant="h6" gutterBottom>Status Distribution:</Typography>
-      <TableContainer component={Paper} sx={{ border: '1px solid', borderColor: 'divider' }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Status</TableCell>
-              <TableCell>Count</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.entries(statusDistribution).map(([status, count]) => (
-              <TableRow key={status}>
-                <TableCell>{status}</TableCell>
-                <TableCell>{count}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
-  );
-
-  // Handle view change
-  const handleViewChange = (event, newView) => {
-    setView(newView);
-  };
-
-  return (
-    <Box>
-      {showAddVehicleForm ? (
-        <Box>
-          <AddVehicle onBack={handleBack} />
-        </Box>
-      ) : (
-        <>
-          <Box sx={{ display: 'flex', gap: 2, marginBottom: 2, alignItems: 'center' }}>
-            <TextField
-              label="Search"
-              variant="outlined"
-              value={searchQuery}
-              onChange={handleSearch} // Update to call handleSearch on change
-              sx={{
-                flexShrink: 1,
-                width: '200px',
-                backgroundColor: 'white',
-                borderRadius: 1,
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: 'grey.300',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: 'primary.main',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'primary.main',
-                  },
-                },
-              }}
-            />
-            <ToggleButtonGroup
-              value={view}
-              exclusive
-              onChange={handleViewChange}
-              sx={{ marginLeft: 'auto' }}
-            >
-              <ToggleButton value="table">Table View</ToggleButton>
-              <ToggleButton value="stats">Stats View</ToggleButton>
-            </ToggleButtonGroup>
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={handleAddVehicle}
-              sx={{ borderRadius: 2, marginLeft: 2 }}
-              startIcon={<Add />}
-            >
-              Add Vehicle
-            </Button>
-          </Box>
-
-          {view === 'table' ? (
-            <Box sx={{ padding: 3, backgroundColor: 'white', borderRadius: 1 }}>
-              <TableContainer component={Paper} sx={{ border: '1px solid', borderColor: 'divider' }}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Vehicle ID</TableCell>
-                      <TableCell>Image</TableCell>
-                      <TableCell>Name</TableCell>
-                      <TableCell>Fuel</TableCell>
-                      <TableCell>Seating</TableCell>
-                      <TableCell>Transmission</TableCell>
-                      <TableCell>Price</TableCell>
-                      <TableCell>Ratings</TableCell>
-                      <TableCell>Description</TableCell>
-                      <TableCell>Status</TableCell>
-                      <TableCell>Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {noResults ? (
-                      <TableRow>
-                        <TableCell colSpan={11} align="center">No Vehicle found.</TableCell>
-                      </TableRow>
-                    ) : (
-                      Vehicle.map((item) => (
-                        <TableRow key={item._id}>
-                          <TableCell>{item.VID}</TableCell>
-                          <TableCell>
-                            <img src={item.image || 'default-image-path'} alt={item.name} style={{ width: '50px', height: '50px' }} />
-                          </TableCell>
-                          <TableCell>{item.name}</TableCell>
-                          <TableCell>{item.fuel}</TableCell>
-                          <TableCell>{item.seating}</TableCell>
-                          <TableCell>{item.transmission}</TableCell>
-                          <TableCell>{item.price}</TableCell>
-                          <TableCell>{item.rate}</TableCell>
-                          <TableCell>{item.description}</TableCell>
-                          <TableCell>{item.status}</TableCell>
-                          <TableCell>
-                            <IconButton onClick={() => handleEdit(item._id)} sx={{ color: 'primary.main' }}>
-                              <Edit />
-                            </IconButton>
-                            <IconButton onClick={() => deleteVehicle(item._id)} sx={{ color: 'error.main' }}>
-                              <Delete />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handlePDF}
-                sx={{ marginTop: 2, borderRadius: 2 }}
-              >
-                <Print /> Download
-              </Button>
+    return (
+        <Container sx={{ mt: 4 }}>
+            <Box display="flex" gap={2} mb={2}>
+                <TextField
+                    label="Search Vehicles"
+                    variant="outlined"
+                    fullWidth
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                />
+                <Select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    displayEmpty
+                    fullWidth
+                >
+                    <MenuItem value="">All Types</MenuItem>
+                    <MenuItem value="Car">Car</MenuItem>
+                    <MenuItem value="Bike">Bike</MenuItem>
+                    <MenuItem value="Van">Van</MenuItem>
+                </Select>
             </Box>
-          ) : (
-            renderStatsView()
-          )}
-        </>
-      )}
-    </Box>
-  );
-}
+            <Grid container spacing={3}>
+                {filteredVehicles.map((vehicle) => (
+                    <Grid item xs={12} sm={6} md={4} key={vehicle.id}>
+                        <Card sx={{ boxShadow: 3, borderRadius: 2 }}>
+                            <CardMedia
+                                component="img"
+                                height="180"
+                                image={vehicle.image}
+                                alt={vehicle.name}
+                                sx={{ objectFit: "cover" }}
+                            />
+                            <CardContent>
+                                <Typography variant="h6" fontWeight={600}>{vehicle.name}</Typography>
+                                <Typography variant="body2" color="text.secondary">Transmission: {vehicle.transmission}</Typography>
+                                <Typography variant="body2" color="text.secondary">Price: ${vehicle.price} per day</Typography>
+                                <Typography variant="body2" color={vehicle.status === "Available" ? "green" : "red"}>Status: {vehicle.status}</Typography>
+                                <Box display="flex" gap={1} mt={2}>
+                                    <Button variant="contained" color={vehicle.status === "Available" ? "success" : "warning"} onClick={() => toggleAvailability(vehicle.id)}>
+                                        {vehicle.status === "Available" ? "Make Unavailable" : "Make Available"}
+                                    </Button>
+                                    <Button variant="contained" color="secondary" onClick={() => handleDelete(vehicle.id)}>
+                                        Delete
+                                    </Button>
+                                    <Button variant="contained" color="info" onClick={() => handleEdit(vehicle)}>
+                                        Edit
+                                    </Button>
+                                </Box>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                ))}
+            </Grid>
+
+            {/* Edit Dialog */}
+            <Dialog open={open} onClose={handleClose}>
+                <DialogTitle>Edit Vehicle Details</DialogTitle>
+                <DialogContent>
+                    {editingVehicle && (
+                        <Box display="flex" flexDirection="column" gap={2} mt={1}>
+                            <TextField label="Name" name="name" value={editingVehicle.name} onChange={handleChange} fullWidth />
+                            <TextField label="Price" name="price" type="number" value={editingVehicle.price} onChange={handleChange} fullWidth />
+                            <TextField label="Transmission" name="transmission" value={editingVehicle.transmission} onChange={handleChange} fullWidth />
+                        </Box>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="secondary">Cancel</Button>
+                    <Button onClick={handleSave} color="primary" variant="contained">Save</Button>
+                </DialogActions>
+            </Dialog>
+        </Container>
+    );
+};
 
 export default VehicleDetails;

@@ -7,7 +7,6 @@ import {
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import Header from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
-import AddFeedback from '../Admin/Feedback/AddFeedback2';
 import { AuthContext } from '../Auth/AuthContext';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import BookIcon from '@mui/icons-material/Book';

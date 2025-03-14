@@ -33,7 +33,7 @@ const UserSchema = new Schema({
   type: {
     type: String,
     required: true,
-    enum: ['admin', 'user'],
+    enum: ['admin', 'user', 'customer', 'owner'],
     default: 'user'
   }
 });
