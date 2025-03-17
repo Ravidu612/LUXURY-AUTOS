@@ -163,7 +163,7 @@ function Customer() {
               label="Search"
               variant="outlined"
               value={searchQuery}
-              onChange={handleSearch} // Update to call handleSearch on change
+              onChange={handleSearch}
               sx={{
                 flexShrink: 1,
                 width: '200px',
@@ -223,7 +223,7 @@ function Customer() {
                         <TableCell colSpan={7} align="center">No users found.</TableCell>
                       </TableRow>
                     ) : (
-                      users.map((user) => (
+                      users.filter(user => user.type === 'customer').map((user) => (
                         <TableRow key={user.userId}>
                           <TableCell>{user.userId}</TableCell>
                           <TableCell>{user.userName}</TableCell>

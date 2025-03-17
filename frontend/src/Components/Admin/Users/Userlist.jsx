@@ -20,7 +20,7 @@ function Userlist() {
 
     const menuItems = [
         { text: 'Dashboard', icon: <DashboardIcon />, path: '/admindashboard' },
-        { text: 'Users Management', icon: <PeopleIcon />, path: '/user-list/user-management' },
+        { text: 'Admin Management', icon: <PeopleIcon />, path: '/user-list/user-management' },
         { text: 'Owners Management', icon: <DashboardIcon />, path: '/user-list/owner-management' },
         { text: 'Customers Management', icon: <EngineeringIcon />, path: '/user-list/customer-management' },
     ];

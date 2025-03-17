@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { Box, Grid, Typography, Link } from '@mui/material';
-import footerLogo from '../Images/3.png'; // Adjust the path according to your project structure
+import footerLogo from '../Images/logo.png'; // Adjust the path according to your project structure
 import  FooterComponent from "../Footer/Footer";
 
 function Footer() {

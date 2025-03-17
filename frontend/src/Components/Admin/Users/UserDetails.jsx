@@ -223,7 +223,7 @@ function UserDetails() {
                         <TableCell colSpan={7} align="center">No users found.</TableCell>
                       </TableRow>
                     ) : (
-                      users.map((user) => (
+                      users.filter(user => user.type === 'admin' || user.type === 'user').map((user) => (
                         <TableRow key={user.userId}>
                           <TableCell>{user.userId}</TableCell>
                           <TableCell>{user.userName}</TableCell>
