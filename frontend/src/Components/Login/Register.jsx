@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../Navbar/Navbar';
-import Footer from '../Footer/Footer'; // Import Footer component
-import { Box, Button, Container, Grid, TextField, Typography, Paper, Divider, Checkbox, FormControlLabel } from '@mui/material';
+import Footer from '../Footer/Footer';
+import { Box, Button, Container, Grid, TextField, Typography, Paper, Checkbox, FormControlLabel } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
-import Logo from '../Images/3.png';
 
 function Register() {
     const navigate = useNavigate();
@@ -22,58 +21,43 @@ function Register() {
     });
 
     const [termsAccepted, setTermsAccepted] = useState(false);
-    const [errors, setErrors] = useState({}); // State to store validation errors
+    const [errors, setErrors] = useState({});
 
     const validate = () => {
         let tempErrors = {};
 
-        // Username validation
-        if (!user.userName.trim()) {
-            tempErrors.userName = "Username is required.";
-        }
-
-        // Name validation - only letters and spaces allowed
+        if (!user.userName.trim()) tempErrors.userName = "Username is required.";
         if (!user.name.trim()) {
             tempErrors.name = "Name is required.";
         } else if (!/^[a-zA-Z\s]*$/.test(user.name)) {
             tempErrors.name = "Name can only contain letters and spaces.";
         }
-
-        // Email validation
         if (!user.email.trim()) {
             tempErrors.email = "Email is required.";
         } else if (!/\S+@\S+\.\S+/.test(user.email)) {
             tempErrors.email = "Email is not valid.";
         }
-
-        // Phone validation
         if (!user.phone.trim()) {
             tempErrors.phone = "Phone number is required.";
         } else if (!/^\d{10}$/.test(user.phone)) {
             tempErrors.phone = "Phone number must be 10 digits.";
         }
-
-        // Password validation
         if (!user.password.trim()) {
             tempErrors.password = "Password is required.";
         } else if (user.password.length < 6) {
             tempErrors.password = "Password must be at least 6 characters.";
         }
-
-        // Confirm Password validation
         if (!user.confirmPassword.trim()) {
             tempErrors.confirmPassword = "Please confirm your password.";
         } else if (user.password !== user.confirmPassword) {
             tempErrors.confirmPassword = "Passwords do not match.";
         }
-
-        // Terms and Conditions validation
         if (!termsAccepted) {
             tempErrors.termsAccepted = "You must accept the terms and conditions.";
         }
 
         setErrors(tempErrors);
-        return Object.keys(tempErrors).length === 0; // Return true if no errors
+        return Object.keys(tempErrors).length === 0;
     };
 
     const handleInputChange = (e) => {
@@ -86,18 +70,10 @@ function Register() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        if (!validate()) {
-            return; // Stop submission if validation fails
-        }
+        if (!validate()) return;
 
-        const userData = {
-            userName: user.userName,
-            name: user.name,
-            email: user.email,
-            phone: user.phone,
-            password: user.password
-        };
+        const userData = { ...user };
+        delete userData.confirmPassword;
 
         try {
             const response = await axios.post("http://localhost:4000/users/register", userData);
@@ -113,111 +89,71 @@ function Register() {
     };
 
     return (
-        <Box sx={{ backgroundColor: '#000000', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ backgroundColor: 'rgb(246, 229, 229)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             <Navbar />
-            <Container sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', paddingY: 5 }}>
-                <Paper elevation={6}  sx={{ paddingRight: 4, paddingLeft: 4, paddingTop: 4, borderRadius: 2, maxWidth: 900, backgroundColor: 'rgba(0,0,0,0.8)' }}>
-                    <Grid container spacing={4}>
-                        <Grid item xs={12} sm={5} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#2C2C2C', borderRadius: 2 }}>
-                            <img src={Logo} alt="Crystal Elegance" style={{ maxWidth: '100%', paddingRight: 30, height: '50vh', paddingBottom: 30 }} />
+            <Container sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', py: 5 }}>
+                <Paper elevation={6} sx={{ width: '100%', maxWidth: '1200px', borderRadius: 2, overflow: 'hidden' }}>
+                    <Grid container sx={{ height: '100%' }}>
+                        {/* Left Section */}
+                        <Grid item xs={12} sm={6} sx={{
+                            background: 'linear-gradient(to bottom right, #FFA500, #FF4500)',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            flexDirection: 'column',
+                            color: '#fff',
+                            p: 4,
+                            minHeight: { xs: 'auto', sm: '600px' }
+                        }}>
+                            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>Welcome to Luxury Autos</Typography>
+                            <Typography variant="body2" sx={{ mb: 3 }}>Already a user?</Typography>
+                            <Button
+                                variant="outlined"
+                                sx={{
+                                    color: '#fff',
+                                    borderColor: '#fff',
+                                    textTransform: 'none',
+                                    borderRadius: 10,
+                                    px: 4
+                                }}
+                                onClick={() => navigate('/login')}
+                            >
+                                Log In
+                            </Button>
                         </Grid>
-                        <Grid item xs={12} sm={7}>
-                            <Typography variant="h4" color="red" gutterBottom sx={{ fontWeight: 'bold' }}>
-                                REGISTER
+
+                        {/* Right Section */}
+                        <Grid item xs={12} sm={6} sx={{ background: '#1f1f1f', p: 4 }}>
+                            <Typography variant="h5" color="white" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+                                Create an Account
                             </Typography>
-                            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-                                <TextField
-                                    fullWidth
-                                    placeholder="Username"
-                                    variant="outlined"
-                                    name="userName"
-                                    value={user.userName}
-                                    onChange={handleInputChange}
-                                    InputProps={{
-                                        startAdornment: <PersonIcon sx={{ color: '#FF0000' }} />,
-                                        sx: { backgroundColor: '#1F1F1F', borderRadius: 2, color: '#FFFFFF'}
-                                    }}
-                                    sx={{ marginBottom: 2 }}
-                                    error={!!errors.userName}
-                                    helperText={errors.userName}
-                                />
-                                <TextField
-                                    fullWidth
-                                    placeholder="Name"
-                                    variant="outlined"
-                                    name="name"
-                                    value={user.name}
-                                    onChange={handleInputChange}
-                                    InputProps={{
-                                        startAdornment: <PersonIcon sx={{ color: '#FF0000' }} />,
-                                        sx: { backgroundColor: '#1F1F1F', borderRadius: 2, color: '#FFFFFF' }
-                                    }}
-                                    sx={{ marginBottom: 2 }}
-                                    error={!!errors.name}
-                                    helperText={errors.name}
-                                />
-                                <TextField
-                                    fullWidth
-                                    placeholder="Email"
-                                    variant="outlined"
-                                    name="email"
-                                    value={user.email}
-                                    onChange={handleInputChange}
-                                    InputProps={{
-                                        startAdornment: <EmailIcon sx={{ color: '#FF0000' }} />,
-                                        sx: { backgroundColor: '#1F1F1F', borderRadius: 2, color: '#FFFFFF' }
-                                    }}
-                                    sx={{ marginBottom: 2 }}
-                                    error={!!errors.email}
-                                    helperText={errors.email}
-                                />
-                                <TextField
-                                    fullWidth
-                                    placeholder="Phone"
-                                    variant="outlined"
-                                    name="phone"
-                                    value={user.phone}
-                                    onChange={handleInputChange}
-                                    InputProps={{
-                                        startAdornment: <PhoneIcon sx={{ color: '#FF0000' }} />,
-                                        sx: { backgroundColor: '#1F1F1F', borderRadius: 2, color: '#FFFFFF' }
-                                    }}
-                                    sx={{ marginBottom: 2 }}
-                                    error={!!errors.phone}
-                                    helperText={errors.phone}
-                                />
-                                <TextField
-                                    fullWidth
-                                    placeholder="Password"
-                                    type="password"
-                                    variant="outlined"
-                                    name="password"
-                                    value={user.password}
-                                    onChange={handleInputChange}
-                                    InputProps={{
-                                        startAdornment: <LockIcon sx={{ color: '#FF0000' }} />,
-                                        sx: { backgroundColor: '#1F1F1F', borderRadius: 2, color: '#FFFFFF' }
-                                    }}
-                                    sx={{ marginBottom: 2 }}
-                                    error={!!errors.password}
-                                    helperText={errors.password}
-                                />
-                                <TextField
-                                    fullWidth
-                                    placeholder="Confirm Password"
-                                    type="password"
-                                    variant="outlined"
-                                    name="confirmPassword"
-                                    value={user.confirmPassword}
-                                    onChange={handleInputChange}
-                                    InputProps={{
-                                        startAdornment: <LockIcon sx={{ color: '#FF0000' }} />,
-                                        sx: { backgroundColor: '#1F1F1F', borderRadius: 2, color: '#FFFFFF' }
-                                    }}
-                                    sx={{ marginBottom: 2 }}
-                                    error={!!errors.confirmPassword}
-                                    helperText={errors.confirmPassword}
-                                />
+                            <Box component="form" onSubmit={handleSubmit}>
+                                {[ 
+                                    { name: "userName", label: "Username", icon: <PersonIcon /> },
+                                    { name: "name", label: "Name", icon: <PersonIcon /> },
+                                    { name: "email", label: "Email", icon: <EmailIcon /> },
+                                    { name: "phone", label: "Phone", icon: <PhoneIcon /> },
+                                    { name: "password", label: "Password", type: "password", icon: <LockIcon /> },
+                                    { name: "confirmPassword", label: "Confirm Password", type: "password", icon: <LockIcon /> }
+                                ].map((field) => (
+                                    <TextField
+                                        key={field.name}
+                                        fullWidth
+                                        placeholder={field.label}
+                                        variant="outlined"
+                                        name={field.name}
+                                        type={field.type || "text"}
+                                        value={user[field.name]}
+                                        onChange={handleInputChange}
+                                        InputProps={{
+                                            startAdornment: <Box sx={{ color: 'rgb(231, 220, 216)', mr: 1 }}>{field.icon}</Box>,
+                                            sx: { backgroundColor: ' #2c2c2c', borderRadius: 2, color: '#fff' }
+                                        }}
+                                        sx={{ mb: 2 }}
+                                        error={!!errors[field.name]}
+                                        helperText={errors[field.name]}
+                                    />
+                                ))}
                                 <FormControlLabel
                                     control={
                                         <Checkbox
@@ -225,16 +161,16 @@ function Register() {
                                             onChange={(e) => setTermsAccepted(e.target.checked)}
                                             sx={{
                                                 color: 'white',
-                                                '&.Mui-checked': { color: '#FF0000' }, // Checkbox color when checked
-                                                '& .MuiSvgIcon-root': { color: 'white' }, // Checkbox frame color when unchecked
+                                                '&.Mui-checked': { color: '#FF4500' },
+                                                '& .MuiSvgIcon-root': { color: 'white' }
                                             }}
                                         />
                                     }
-                                    label="Accept Terms and Conditions"
-                                    sx={{ color: 'white', marginBottom: 2 }}
+                                    label={<Typography variant="body2" color="white">Accept Terms and Conditions</Typography>}
+                                    sx={{ mb: 1 }}
                                 />
                                 {errors.termsAccepted && (
-                                    <Typography variant="body2" color="error" sx={{ marginBottom: 2 }}>
+                                    <Typography variant="body2" color="error" sx={{ mb: 2 }}>
                                         {errors.termsAccepted}
                                     </Typography>
                                 )}
@@ -243,20 +179,16 @@ function Register() {
                                     fullWidth
                                     variant="contained"
                                     sx={{
-                                        backgroundColor: '#FF0000',
+                                        background: 'linear-gradient(to right, #FFA500, #FF4500)',
                                         color: '#fff',
-                                        paddingY: 1.5,
+                                        py: 1.5,
                                         borderRadius: 2,
-                                        boxShadow: 'none',
                                         textTransform: 'none',
                                         fontWeight: 'bold'
                                     }}
                                 >
                                     Create Account
                                 </Button>
-                                <Divider sx={{ marginY: 2 }}>
-                                    <Typography variant="body2">Or sign up with</Typography>
-                                </Divider>
                             </Box>
                         </Grid>
                     </Grid>

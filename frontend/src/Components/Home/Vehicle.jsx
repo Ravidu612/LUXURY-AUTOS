@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardMedia, Typography, Button, Grid, TextField, Select, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import Header from '../Navbar/Navbar';
-import React from 'react';
 
 const VehiclePage = () => {
     const [vehicles, setVehicles] = useState([

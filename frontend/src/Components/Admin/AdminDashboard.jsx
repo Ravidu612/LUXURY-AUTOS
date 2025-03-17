@@ -19,7 +19,7 @@ function AdminDashboard() {
   const [showSupplierListButton, setShowSupplierListButton] = useState(false);
 
   const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/admindashboard' },
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/admindashboard/dashboard' },
     { text: 'Users Management', icon: <PeopleIcon />, path: '/user-list/user-management' },
     { text: 'Vehicle Management', icon: <DashboardIcon />, path: '/admindashboard/Vehicle-management' },
     { text: 'Booking Management', icon: <ConfirmationNumberIcon />, path: '/admindashboard/booking-management' },

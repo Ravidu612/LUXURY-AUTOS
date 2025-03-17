@@ -7,8 +7,7 @@ import Footer from '../Footer/Footer';
 import { Box, Button, Container, Grid, TextField, Typography, Paper, Divider } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 import PersonIcon from '@mui/icons-material/Person';
-import Logo from '../Images/3.png';
-
+import log from '../Images/car.png';
 function Login() {
     const navigate = useNavigate();
     const { login } = useContext(AuthContext);
@@ -35,12 +34,11 @@ function Login() {
 
             if (response.status === 200) {
                 const { token, user: loggedInUser } = response.data;
-
                 login(token, loggedInUser);
 
                 if (loggedInUser.type === "admin") {
                     alert("Admin Login Successful");
-                    navigate("/admindashboard");
+                    navigate("/admindashboard/dashboard");
                 } else {
                     alert("User Login Successful");
                     navigate("/userprofile");
@@ -60,20 +58,29 @@ function Login() {
     };
 
     return (
-        <Box sx={{ backgroundColor: '#000000', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             <Navbar />
-            <Container sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', paddingY: 5 }}>
-                <Paper elevation={6} sx={{ paddingRight: 4, paddingLeft: 4, paddingTop: 4, borderRadius: 2, maxWidth: 900, backgroundColor: 'rgba(0,0,0,0.8)' }}>
-                    <Grid container spacing={4}>
-                        <Grid item xs={12} sm={5} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#2C2C2C', borderRadius: 2 }}>
-                            <img src={Logo} alt="Sky Light Cinema" style={{ maxWidth: '100%', paddingRight: 30, height: '50vh', paddingBottom: 30 }} />
+            <Container sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', py: 5 }}>
+                <Paper elevation={6} sx={{ borderRadius: 3, overflow: 'hidden', maxWidth: 900 }}>
+                    <Grid container>
+                        {/* Left Side Image */}
+                        <Grid item xs={12} sm={6} sx={{ background: 'linear-gradient(to bottom right, #FFA500, #FF4500)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#fff', padding: 4 }}>
+                            <img src={log} alt="Welcome Banner" style={{ maxWidth: '80%', marginBottom: '20px' }} />
+                            <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>Welcome to Luxury Autos</Typography>
+                            <Typography variant="body1" sx={{ mb: 2 }}>Don't have an account?</Typography>
+                            <Button
+                                variant="outlined"
+                                onClick={() => navigate('/signup')}
+                                sx={{ borderColor: '#fff', color: '#fff', textTransform: 'none', borderRadius: 2 }}
+                            >
+                                Sign Up
+                            </Button>
                         </Grid>
-                        <Grid item xs={12} sm={7}>
-                            <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#FF0000' }}>
-                                LOGIN
-                            </Typography>
-                            <Typography variant="subtitle1" sx={{ marginBottom: 2, color: '#FFFFFF' }}>
-                                Enter the realm of cinema
+
+                        {/* Right Side Form */}
+                        <Grid item xs={12} sm={6} sx={{ padding: 4 }}>
+                            <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#333' }}>
+                                Sign In
                             </Typography>
                             <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
                                 <TextField
@@ -84,10 +91,9 @@ function Login() {
                                     value={user.name}
                                     onChange={handleInputChange}
                                     InputProps={{
-                                        startAdornment: <PersonIcon sx={{ color: '#FF0000' }} />,
-                                        sx: { backgroundColor: '#1F1F1F', borderRadius: 2, color: '#FFFFFF' }
+                                        startAdornment: <PersonIcon sx={{ color: '#0072FF', mr: 1 }} />,
                                     }}
-                                    sx={{ marginBottom: 2 }}
+                                    sx={{ mb: 2 }}
                                 />
                                 <TextField
                                     fullWidth
@@ -97,23 +103,30 @@ function Login() {
                                     name="password"
                                     value={user.password}
                                     onChange={handleInputChange}
-                                    InputProps={{
-                                        startAdornment: <LockIcon sx={{ color: '#FF0000' }} />,
-                                        sx: { backgroundColor: '#1F1F1F', borderRadius: 2, color: '#FFFFFF' }
+                                    InputAdornment={{
+                                        startAdornment: <LockIcon sx={{ color: '#0072FF', mr: 1 }} />,
                                     }}
-                                    sx={{ marginBottom: 3 }}
+                                    sx={{ mb: 3 }}
                                 />
                                 <Button
                                     type="submit"
                                     fullWidth
                                     variant="contained"
-                                    sx={{ backgroundColor: '#FF0000', color: '#FFFFFF', paddingY: 1.5, borderRadius: 2, boxShadow: 'none', textTransform: 'none', fontWeight: 'bold' }}
+                                    sx={{ background: 'linear-gradient(to right, #00C6FF, #0072FF)', color: '#fff', py: 1.5, borderRadius: 2, boxShadow: 'none', textTransform: 'none', fontWeight: 'bold' }}
                                 >
-                                    Login Now
+                                    Sign In
                                 </Button>
-                                <Divider sx={{ marginY: 2, borderColor: '#FFFFFF' }}>
-                                    <Typography variant="body2" sx={{ color: '#FFFFFF' }}>Login with Others</Typography>
+                                <Divider sx={{ my: 3 }}>
+                                    <Typography variant="body2" sx={{ color: '#888' }}>or</Typography>
                                 </Divider>
+                                <Button
+                                    variant="text"
+                                    fullWidth
+                                    sx={{ color: '#0072FF', textTransform: 'none', fontWeight: 'bold' }}
+                                    onClick={() => navigate('/forgot-password')}
+                                >
+                                    Forgot Password?
+                                </Button>
                             </Box>
                         </Grid>
                     </Grid>

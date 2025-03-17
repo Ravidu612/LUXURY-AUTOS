@@ -1,7 +1,9 @@
-import { Box, AppBar, Toolbar, Typography, Button, IconButton } from '@mui/material';
+import { Box, AppBar, Toolbar, Typography, Button } from '@mui/material';
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../Auth/AuthContext'; // Adjust the path as needed
+import Footer from '../Footer/Footer';
+
 
 function Navbar() {
   const { authState, logout } = useContext(AuthContext);
@@ -10,41 +12,80 @@ function Navbar() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login'); // Redirect to login page after logout
+    navigate('/login');
   };
-
-
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static" sx={{ backgroundColor: '#161516' }}>
-        <Toolbar>
-          {/* Navbar Items */}
-          <Typography variant="h5" component="div" sx={{ flexGrow: 1, color: 'red' }} >
-            <Button color="inherit" component={Link} to="/">Home</Button>
-            <Button color="inherit" component={Link} to="/Vehicle">Vehicle</Button>
-            <Button color="inherit" component={Link} to="/Buy">Booking</Button>
-            <Button color="inherit" component={Link} to="/promotions">Promotions</Button>
-            <Button color="inherit" component={Link} to="/About">About Us</Button>
-            <Button color="inherit" component={Link} to="/Contact">Contact Us</Button>
+      <AppBar position="static" elevation={0} sx={{ backgroundColor: '#ffffff', padding: '0 40px' }}>
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          {/* Left Section - Brand Logo */}
+          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#FFB400' }}>
+            Luxury Autos
           </Typography>
 
-          {/* Right Side Items */}
-          
-          {user ? (
-            <>
-              <Typography variant="body1" sx={{ mx: 2, color: 'red' }}>
-                Hello, {user.name}
-              </Typography>
-              <Button color="inherit" onClick={handleLogout} sx={{ mx: 2, color: 'red' }}>Logout</Button>
-            </>
-          ) : (
-            <>
-              <Button color="inherit" component={Link} to="/login" sx={{ mx: 2, color: 'red' }}>Sign In</Button>
-              <Button color="inherit" component={Link} to="/signup" sx={{ mx: 2, color: 'red' }}>Sign Up</Button>
+          {/* Middle Section - Nav Links */}
+          <Box sx={{ display: 'flex', gap: '20px' }}>
+            <Button component={Link} to="/" sx={{ color: '#161516', fontWeight: '500' }}>Home</Button>
+            <Button component={Link} to="/Vehicle" sx={{ color: '#161516', fontWeight: '500' }}>Book Cars</Button>
+            <Button component={Link} to="/Buy" sx={{ color: '#161516', fontWeight: '500' }}>payment</Button>
+            <Button component={Link} to="/promotions" sx={{ color: '#161516', fontWeight: '500' }}>Promotions</Button>
+            <Button component={Link} to="/About" sx={{ color: '#161516', fontWeight: '500' }}>About Us</Button>
+            <Button component={Link} to="/Contact" sx={{ color: '#161516', fontWeight: '500' }}>Contact</Button>
+          </Box>
+
+          {/* Right Section - Auth Buttons */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            {user ? (
+              <>
+                <Typography variant="body1" sx={{ color: '#161516', fontWeight: 500 }}>
+                  Hello, {user.name}
+                </Typography>
+                <Button
+                  onClick={handleLogout}
+                  sx={{
+                    backgroundColor: '#FFB400',
+                    color: '#fff',
+                    borderRadius: '20px',
+                    textTransform: 'none',
+                    padding: '6px 20px',
+                    '&:hover': { backgroundColor: '#e5a200' }
+                  }}
+                >
+                  Logout
+                </Button>
               </>
-          )}
-          </Toolbar>
+            ) : (
+              <>
+                <Button
+                  component={Link}
+                  to="/login"
+                  sx={{
+                    color: '#161516',
+                    fontWeight: '500',
+                    textTransform: 'none',
+                  }}
+                >
+                  Sign In
+                </Button>
+                <Button
+                  component={Link}
+                  to="/signup"
+                  sx={{
+                    backgroundColor: '#FFB400',
+                    color: '#fff',
+                    borderRadius: '20px',
+                    textTransform: 'none',
+                    padding: '6px 20px',
+                    '&:hover': { backgroundColor: '#e5a200' }
+                  }}
+                >
+                  Sign Up
+                </Button>
+              </>
+            )}
+          </Box>
+        </Toolbar>
       </AppBar>
     </Box>
   );
