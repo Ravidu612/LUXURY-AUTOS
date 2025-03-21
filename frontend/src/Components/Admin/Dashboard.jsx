@@ -11,7 +11,7 @@ export default class Dashboard extends Component {
     super(props);
     this.state = {
       houseCount: 0,
-      buildingCount: 0,
+      VehicleCount: 0,
       employeeCount: 0,
       inventoryCount: 0, //
       supplierCount: 0, //  
@@ -23,7 +23,7 @@ export default class Dashboard extends Component {
 
   componentDidMount() {
     this.fetchHouseCount(); // Fetch the real house count
-    this.fetchbuildingCount(); // Fetch the real building count
+    this.fetchVehicleCount(); // Fetch the real building count
     this.fetchUserCount(); // Fetch the real user count
     this.fetchEmployeeCount(); // Fetch the real employee count
     this.fetchInventoryCount(); // Fetch the real inventory count
@@ -34,7 +34,7 @@ export default class Dashboard extends Component {
     // Simulate real-time updates (example, every 10 seconds)
     this.interval = setInterval(() => {
       this.simulateRealTimeUpdates();
-      this.fetchbuildingCount(); // Refresh building count
+      this.fetchVehicleCount(); // Refresh building count
       this.fetchUserCount(); // Refresh user count
       this.fetchEmployeeCount(); // Refresh employee count
       this.fetchInventoryCount(); // Refresh inventory count
@@ -59,10 +59,10 @@ export default class Dashboard extends Component {
   };
 
   // Fetch the building count from the server
-  fetchbuildingCount = async () => {
+  fetchVehicleCount = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/api/buildings'); // Ensure this points to your buildings endpoint
-      this.setState({ buildingCount: response.data.length });
+      const response = await axios.get('http://localhost:4000/api/Vehicle'); // Ensure this points to your Vehicle endpoint
+      this.setState({ VehicleCount: response.data.length });
     } catch (error) {
       console.error("Error fetching building count:", error);
     }
@@ -134,7 +134,7 @@ export default class Dashboard extends Component {
   render() {
     const {
       houseCount,
-      buildingCount,
+      VehicleCount,
       employeeCount,
       inventoryCount,
       supplierCount,
@@ -281,7 +281,7 @@ export default class Dashboard extends Component {
 
 
 
-          {/* buildings */}
+          {/* Vehicle */}
           <Grid item xs={12} sm={6} md={4}>
             <Card
               sx={{
@@ -315,7 +315,7 @@ export default class Dashboard extends Component {
                     letterSpacing: '0.05em',
                   }}
                 >
-                  buildings
+                  Vehicle
                 </Typography>
                 <Typography
                   variant="h3"
@@ -326,7 +326,7 @@ export default class Dashboard extends Component {
                     marginTop: '0.5rem',
                   }}
                 >
-                  {buildingCount}
+                  {VehicleCount}
                 </Typography>
                 <Typography
                   variant="body2"
@@ -336,7 +336,7 @@ export default class Dashboard extends Component {
                     marginTop: '0.5rem',
                   }}
                 >
-                  Total number of buildings
+                  Total number of Vehicle
                 </Typography>
               </CardContent>
             </Card>

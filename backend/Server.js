@@ -11,14 +11,9 @@ const userRoutes = require('./Routes/UserRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const VehiclesRoutes = require('./Routes/VehiclesRoutes');
 const customerRoutes = require('./Routes/CustomerRoutes');
-const feedbackRoutes = require('./Routes/FeedbackRoutes');
-const employeeRoutes = require('./Routes/EmployeeRoutes');
 const bookingRoutes = require('./Routes/BookingRoutes');
 const promotionRoutes = require('./Routes/PromotionRoutes');
-const inventoryRoutes = require('./Routes/InventoryRoutes');
 const authRoutes = require('./Routes/AuthRoutes');
-const supplierRoutes = require('./Routes/SupplierRoutes');
-const salaryRoutes = require('./Routes/SalaryRoutes');
 
 // Middleware
 app.use(express.json());
@@ -28,16 +23,11 @@ app.use(cors()); // Configurable if needed with CORS options
 app.use('/users', userRoutes);
 app.use('/Vehicles', VehiclesRoutes);
 app.use('/customers', customerRoutes);
-app.use('/feedback', feedbackRoutes);
-app.use('/employees', employeeRoutes);
 app.use('/payment', paymentRoutes);
 app.use('/promotions', promotionRoutes);  // Prefix for promotion routes
 app.use('/bookings', bookingRoutes);
-app.use('/inventory', inventoryRoutes);
-app.use('/suppliers', supplierRoutes);
 app.use('/auth', authRoutes);
 app.use('/payments', paymentRoutes); // Prefixing all payment routes with `/payments`
-app.use('/salaries', salaryRoutes);
 
 // Serve static files (uploaded images)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
