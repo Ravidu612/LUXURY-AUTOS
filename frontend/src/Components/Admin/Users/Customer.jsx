@@ -61,7 +61,7 @@ function Customer() {
     
     // Add the main topic as the title
     doc.setFontSize(18);
-    doc.text("SKY LIGHT CINEMA", 10, 10);
+    doc.text("LUXURY AUTOS", 10, 10);
     
     // Add a subtitle or description if needed
     doc.setFontSize(12);
@@ -198,7 +198,7 @@ function Customer() {
               sx={{ borderRadius: 2, marginLeft: 2 }}
               startIcon={<Add />}
             >
-              Add User
+              Add Customer
             </Button>
           </Box>
 

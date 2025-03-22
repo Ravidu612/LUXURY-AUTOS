@@ -11,13 +11,14 @@ function AboutUs() {
       <Container maxWidth="lg" sx={{ marginTop: 4 }}>
         {/* Main Header */}
         <Typography variant="h3" align="center" gutterBottom>
-          About Sky Light Cinema
+          About Luxury Autos
         </Typography>
 
         {/* Introduction Section */}
         <Typography variant="body1" paragraph align="center" sx={{ marginBottom: 4 }}>
-          Welcome to Sky Light Cinema, your ultimate destination for unforgettable cinematic experiences. 
-          Whether you're a movie enthusiast or just looking for a fun night out, we offer the perfect blend of entertainment, comfort, and technology.
+          Welcome to Luxury Autos, your premier destination for high-end vehicle rentals. 
+          Whether you're looking for a stylish ride for a special occasion or a luxury experience for your travels, 
+          we offer a top-tier selection of premium vehicles designed to meet your needs.
         </Typography>
 
         {/* Our Mission Section */}
@@ -25,9 +26,8 @@ function AboutUs() {
           Our Mission
         </Typography>
         <Typography variant="body1" paragraph align="center">
-          At Sky Light Cinema, we are committed to delivering exceptional movie experiences through cutting-edge technology, 
-          superior customer service, and a passion for great films. We aim to create a space where movie lovers can gather, 
-          share their love for cinema, and be immersed in stories that inspire and entertain.
+          At Luxury Autos, our mission is to provide unparalleled vehicle rental services with a focus on excellence, 
+          comfort, and sophistication. We are dedicated to offering our clients a seamless and luxurious driving experience.
         </Typography>
 
         {/* Core Values Section */}
@@ -40,11 +40,10 @@ function AboutUs() {
             <Grid item xs={12} sm={6} md={4}>
               <Paper elevation={3} sx={{ padding: 3, textAlign: 'center' }}>
                 <Typography variant="h6" gutterBottom>
-                  Innovation
+                  Quality & Performance
                 </Typography>
                 <Typography variant="body2">
-                  We embrace the latest in cinema technology, from high-definition screens to immersive sound systems, 
-                  ensuring our audience experiences movies in the best possible way.
+                  We offer only the finest luxury vehicles, ensuring our clients experience the perfect blend of performance, style, and comfort.
                 </Typography>
               </Paper>
             </Grid>
@@ -53,11 +52,10 @@ function AboutUs() {
             <Grid item xs={12} sm={6} md={4}>
               <Paper elevation={3} sx={{ padding: 3, textAlign: 'center' }}>
                 <Typography variant="h6" gutterBottom>
-                  Customer Experience
+                  Customer Satisfaction
                 </Typography>
                 <Typography variant="body2">
-                  Our customers are our top priority. From the moment you walk in, we ensure a seamless and enjoyable experience, 
-                  from ticketing to concessions, to the comfort of our theaters.
+                  Our clients are our top priority. We strive to provide exceptional service, seamless booking experiences, and personalized support.
                 </Typography>
               </Paper>
             </Grid>
@@ -66,61 +64,42 @@ function AboutUs() {
             <Grid item xs={12} sm={6} md={4}>
               <Paper elevation={3} sx={{ padding: 3, textAlign: 'center' }}>
                 <Typography variant="h6" gutterBottom>
-                  Community Engagement
+                  Innovation & Excellence
                 </Typography>
                 <Typography variant="body2">
-                  We believe in giving back to the community. Sky Light Cinema actively supports local filmmakers, hosts community events, 
-                  and fosters a culture of creativity and connection through the magic of movies.
+                  We stay ahead of the curve by integrating the latest technology and luxury features into our vehicle selection and services.
                 </Typography>
               </Paper>
             </Grid>
           </Grid>
         </Box>
 
-        {/* History Section */}
-        <Typography variant="h4" gutterBottom align="center" sx={{ marginTop: 6 }}>
-          Our Journey
-        </Typography>
-        <Typography variant="body1" paragraph align="center">
-          Since our inception in 2024, Sky Light Cinema has grown from a single-screen theater to a multi-screen entertainment hub. 
-          What started as a dream to bring high-quality cinema to our local community has now expanded into a full-scale operation, 
-          offering the latest blockbusters, independent films, and special screenings.
-        </Typography>
-        <Typography variant="body1" paragraph align="center">
-          Through continuous innovation and a commitment to excellence, we strive to provide our customers with the best cinematic experience 
-          every time they visit us. We are excited for the future as we continue to evolve and set new standards for movie entertainment.
-        </Typography>
-
         {/* Why Choose Us Section */}
         <Box sx={{ marginTop: 6 }}>
           <Typography variant="h4" gutterBottom align="center">
-            Why Choose Sky Light Cinema?
+            Why Choose Luxury Autos?
           </Typography>
           <Grid container spacing={4}>
             <Grid item xs={12} md={6}>
               <Typography variant="h6" gutterBottom>
-                Cutting-Edge Technology
+                Exclusive Fleet
               </Typography>
               <Typography variant="body1">
-                We use the latest in projection and sound technologies, ensuring every movie feels larger than life. 
-                Our high-definition screens and state-of-the-art sound systems immerse you fully in the film, making every detail come alive.
+                From sports cars to executive sedans, our curated fleet features the latest and most prestigious vehicles from world-renowned brands.
               </Typography>
             </Grid>
 
             <Grid item xs={12} md={6}>
               <Typography variant="h6" gutterBottom>
-                Comfort and Convenience
+                Hassle-Free Experience
               </Typography>
               <Typography variant="body1">
-                Our theaters are designed with your comfort in mind. With spacious, luxurious seating, easy online ticketing, and a wide range of snacks and drinks, 
-                Sky Light Cinema offers everything you need for a relaxing and enjoyable movie experience.
+                Our streamlined rental process ensures that you can get behind the wheel of your dream car with ease, convenience, and confidence.
               </Typography>
             </Grid>
           </Grid>
         </Box>
-
       </Container>
-
       <Footer />
     </div>
   );

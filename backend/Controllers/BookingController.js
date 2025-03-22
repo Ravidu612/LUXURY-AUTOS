@@ -1,27 +1,36 @@
-const Booking = require('../Model/BookingModel');
+const VehicleBooking = require('../Model/BookingModel');  // Adjust according to your model path
 
-// Generate Booking ID with leading zeros
+// Generate Vehicle Booking ID with leading zeros
 const generateBookingId = async () => {
-    const lastBooking = await Booking.findOne().sort({ BookingId: -1 }).limit(1);
-    const lastId = lastBooking ? parseInt(lastBooking.BookingId.replace('B', ''), 10) : 0;
-    const newId = `B${(lastId + 1).toString().padStart(3, '0')}`;
+    const lastBooking = await VehicleBooking.findOne().sort({ BookingId: -1 }).limit(1);
+    const lastId = lastBooking ? parseInt(lastBooking.BookingId.replace('V', ''), 10) : 0;
+    const newId = `V${(lastId + 1).toString().padStart(3, '0')}`;
     return newId;
 };
 
-// Create a new Booking item
+// Create a new Vehicle Booking
 exports.createBooking = async (req, res) => {
     try {
-        const { TicketId, count, movieId, userId, showTimeId, date, seat } = req.body;
+        const { pickUpLocation, date, vehicleType, vehicleName, price, dateFrom, dateTo } = req.body;
         
         // Generate new Booking ID
         const BookingId = await generateBookingId();
         
         // Check if all required fields are present
-        if (!TicketId || !count || !movieId || !userId || !date || !seat) {
+        if (!pickUpLocation || !date || !vehicleType || !vehicleName || !price || !dateFrom || !dateTo) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
-        const newBooking = new Booking({ BookingId, TicketId, count, movieId, userId, showTimeId, date, seat });
+        const newBooking = new VehicleBooking({
+            BookingId,
+            pickUpLocation,
+            date,
+            vehicleType,
+            vehicleName,
+            price,
+            dateFrom,
+            dateTo,
+        });
         await newBooking.save();
 
         res.status(201).json({ message: 'Booking created successfully', Booking: newBooking });
@@ -30,22 +39,22 @@ exports.createBooking = async (req, res) => {
     }
 };
 
-// Get all Booking items
-exports.getAllBooking = async (req, res) => {
+// Get all Vehicle Booking items
+exports.getAllBookings = async (req, res) => {
     try {
-        const bookings = await Booking.find();
+        const bookings = await VehicleBooking.find();
         res.status(200).json(bookings);
     } catch (error) {
         res.status(500).json({ message: 'Error retrieving bookings', error: error.message });
     }
 };
 
-// Get a single Booking item by ID
+// Get a single Vehicle Booking item by ID
 exports.getBookingById = async (req, res) => {
     const id = req.params.id;
 
     try {
-        const booking = await Booking.findById(id);
+        const booking = await VehicleBooking.findById(id);
         if (!booking) {
             return res.status(404).json({ message: 'Booking not found' });
         }
@@ -55,15 +64,15 @@ exports.getBookingById = async (req, res) => {
     }
 };
 
-// Update a Booking item by ID
+// Update a Vehicle Booking item by ID
 exports.updateBooking = async (req, res) => {
     const id = req.params.id;
-    const { TicketId, count, movieId, userId, showTimeId, date, seat } = req.body;
+    const { pickUpLocation, date, vehicleType, vehicleName, price, dateFrom, dateTo } = req.body;
 
     try {
-        const updatedBooking = await Booking.findByIdAndUpdate(
+        const updatedBooking = await VehicleBooking.findByIdAndUpdate(
             id,
-            { TicketId, count, movieId, userId, showTimeId, date, seat },
+            { pickUpLocation, date, vehicleType, vehicleName, price, dateFrom, dateTo },
             { new: true, runValidators: true } // Return the updated Booking, validate inputs
         );
 
@@ -77,7 +86,7 @@ exports.updateBooking = async (req, res) => {
     }
 };
 
-// Delete a Booking item by ID
+// Delete a Vehicle Booking item by ID
 const mongoose = require('mongoose');
 
 exports.deleteBooking = async (req, res) => {
@@ -89,7 +98,7 @@ exports.deleteBooking = async (req, res) => {
     }
 
     try {
-        const deletedBooking = await Booking.findByIdAndDelete(id);
+        const deletedBooking = await VehicleBooking.findByIdAndDelete(id);
         if (!deletedBooking) {
             return res.status(404).json({ message: 'Booking not found' });
         }
@@ -99,4 +108,3 @@ exports.deleteBooking = async (req, res) => {
         res.status(500).json({ message: 'Error deleting Booking', error: error.message });
     }
 };
-

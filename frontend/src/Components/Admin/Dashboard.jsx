@@ -2,45 +2,31 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import { Grid, Card, CardContent, Typography, Box } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBuilding, faUsers, faHammer, faTruck, faPersonArrowDownToLine, faSackDollar, faHouse } from '@fortawesome/free-solid-svg-icons';
-
-
+import { faCar, faUsers, faCalendarCheck, faDollarSign } from '@fortawesome/free-solid-svg-icons';
 
 export default class Dashboard extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      houseCount: 0,
-      VehicleCount: 0,
-      employeeCount: 0,
-      inventoryCount: 0, //
-      supplierCount: 0, //  
-      orderCount: 0, //
-      SalesCount: 0, //
-      userCount: 0, // 
+      vehicleCount: 0,
+      userCount: 0,
+      bookingCount: 0,
+      salesCount: 0,
     };
   }
 
   componentDidMount() {
-    this.fetchHouseCount(); // Fetch the real house count
-    this.fetchVehicleCount(); // Fetch the real building count
-    this.fetchUserCount(); // Fetch the real user count
-    this.fetchEmployeeCount(); // Fetch the real employee count
-    this.fetchInventoryCount(); // Fetch the real inventory count
-    this.fetchSupplierCount(); // Fetch the fake supplier count
-    this.fetchOrderCount(); // Fetch the fake order count
-    this.fetchSalesCount(); // Fetch the fake Sales count
+    this.fetchVehicleCount();
+    this.fetchUserCount();
+    this.fetchBookingCount();
+    this.fetchSalesCount();
 
     // Simulate real-time updates (example, every 10 seconds)
     this.interval = setInterval(() => {
-      this.simulateRealTimeUpdates();
-      this.fetchVehicleCount(); // Refresh building count
-      this.fetchUserCount(); // Refresh user count
-      this.fetchEmployeeCount(); // Refresh employee count
-      this.fetchInventoryCount(); // Refresh inventory count
-      this.fetchSupplierCount(); // Refresh supplier count
-      this.fetchOrderCount(); // Refresh order count
-      this.fetchSalesCount(); // Refresh Sales count
+      this.fetchVehicleCount();
+      this.fetchUserCount();
+      this.fetchBookingCount();
+      this.fetchSalesCount();
     }, 10000);
   }
 
@@ -48,23 +34,13 @@ export default class Dashboard extends Component {
     clearInterval(this.interval); // Clear interval on component unmount
   }
 
-  // Fetch the house count from the server
-  fetchHouseCount = async () => {
-    try {
-      const response = await axios.get('http://localhost:4000/house');
-      this.setState({ houseCount: response.data.length });
-    } catch (error) {
-      console.error("Error fetching house count:", error);
-    }
-  };
-
-  // Fetch the building count from the server
+  // Fetch the vehicle count from the server
   fetchVehicleCount = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/api/Vehicle'); // Ensure this points to your Vehicle endpoint
-      this.setState({ VehicleCount: response.data.length });
+      const response = await axios.get('http://localhost:4000/api/vehicles'); // Ensure this points to your vehicles endpoint
+      this.setState({ vehicleCount: response.data.length });
     } catch (error) {
-      console.error("Error fetching building count:", error);
+      console.error("Error fetching vehicle count:", error);
     }
   };
 
@@ -78,70 +54,28 @@ export default class Dashboard extends Component {
     }
   };
 
-  // Fetch the employee count from the server
-  fetchEmployeeCount = async () => {
+  // Fetch the booking count from the server
+  fetchBookingCount = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/employees'); // Ensure this points to your employees endpoint
-      this.setState({ employeeCount: response.data.length }); // Set the employee count based on the retrieved data
+      const response = await axios.get('http://localhost:4000/bookings'); // Ensure this points to your bookings endpoint
+      this.setState({ bookingCount: response.data.length });
     } catch (error) {
-      console.error("Error fetching employee count:", error);
+      console.error("Error fetching booking count:", error);
     }
   };
 
-  // Fetch the inventory count from the server
-  fetchInventoryCount = async () => {
-    try {
-      const response = await axios.get('http://localhost:4000/inventory'); // Ensure this points to your inventory endpoint
-      this.setState({ inventoryCount: response.data.length }); // Set the inventory count based on the retrieved data
-    } catch (error) {
-      console.error("Error fetching inventory count:", error);
-    }
-  };
-  fetchSupplierCount = async () => {
-    try {
-      const response = await axios.get('http://localhost:4000/api/PropertyOwners'); // Ensure this points to your Property Owners endpoint
-      this.setState({ supplierCount: response.data.length }); // Set the supplier count based on the retrieved data
-    } catch (error) {
-      console.error("Error fetching supplier count:", error);
-    }
-  };
-  fetchOrderCount = async () => {
-    try {
-      const response = await axios.get('http://localhost:4000/Lands'); // Ensure this points to your Lands endpoint
-      this.setState({ orderCount: response.data.length }); // Set the order count based on the retrieved data
-    } catch (error) {
-      console.error("Error fetching order count:", error);
-    }
-  };
+  // Fetch the sales count from the server
   fetchSalesCount = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/sales'); // Ensure this points to your Sales endpoint
-      this.setState({ SalesCount: response.data.length }); // Set the Sales count based on the retrieved data
+      const response = await axios.get('http://localhost:4000/sales'); // Ensure this points to your sales endpoint
+      this.setState({ salesCount: response.data.length });
     } catch (error) {
-      console.error("Error fetching Sales count:", error);
+      console.error("Error fetching sales count:", error);
     }
-  };
-
-  // Simulate real-time updates for other counts (fake example)
-  simulateRealTimeUpdates = () => {
-    this.setState((prevState) => ({
-      supplierCount: prevState.supplierCount + Math.floor(Math.random() * 1),
-      orderCount: prevState.orderCount + Math.floor(Math.random() * 4),
-      SalesCount: prevState.SalesCount + Math.floor(Math.random() * 1),
-    }));
   };
 
   render() {
-    const {
-      houseCount,
-      VehicleCount,
-      employeeCount,
-      inventoryCount,
-      supplierCount,
-      orderCount,
-      SalesCount,
-      userCount,
-    } = this.state;
+    const { vehicleCount, userCount, bookingCount, salesCount } = this.state;
 
     return (
       <Box
@@ -155,133 +89,7 @@ export default class Dashboard extends Component {
         <Typography variant="h4" sx={{ marginBottom: 3, fontWeight: 'bold', color: '#333', textShadow: '1px 1px 3px rgba(255, 255, 255, 0.7)' }}>Admin Dashboard</Typography>
         <Grid container spacing={3}>
 
-
-
-          {/* Lands */}
-          <Grid item xs={12} sm={6} md={4}>
-            <Card
-              sx={{
-                backgroundColor: 'rgba(255, 224, 178, 0.5)', // Transparent gradient-like background
-                boxShadow: '0 8px 20px rgba(230, 74, 25, 0.5)', // Softer orange shadow
-                borderRadius: 3,
-                transition: 'transform 0.3s ease-in-out', // Hover effect
-                backdropFilter: 'blur(10px)', // Blur effect for transparency
-                '&:hover': {
-                  transform: 'scale(1.05)',
-                },
-              }}
-            >
-              <CardContent
-                sx={{
-                  textAlign: 'center',
-                  padding: '2rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <FontAwesomeIcon icon={faPersonArrowDownToLine} size="3x" color="#e64a19" />
-                <Typography
-                  variant="h6"
-                  sx={{
-                    marginTop: 2,
-                    fontWeight: 'bold',
-                    color: '#bf360c', // Darker orange for contrast
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  Lands
-                </Typography>
-                <Typography
-                  variant="h3"
-                  sx={{
-                    fontWeight: 'bold',
-                    color: '#e64a19',
-                    fontSize: '3rem',
-                    marginTop: '0.5rem',
-                  }}
-                >
-                  {orderCount}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#bf360c',
-                    fontStyle: 'italic',
-                    marginTop: '0.5rem',
-                  }}
-                >
-                  Total number of Lands
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* House */}
-          <Grid item xs={12} sm={6} md={4}>
-            <Card
-              sx={{
-                backgroundColor: 'rgba(249, 194, 255, 0.5)', // Transparent purple-pink background
-                boxShadow: '0 8px 20px rgba(106, 27, 154, 0.5)', // Softer shadow with purple tone
-                borderRadius: 3,
-                transition: 'transform 0.3s ease-in-out', // Hover effect
-                backdropFilter: 'blur(10px)', // Blur effect for transparency
-                '&:hover': {
-                  transform: 'scale(1.05)',
-                },
-              }}
-            >
-              <CardContent
-                sx={{
-                  textAlign: 'center',
-                  padding: '2rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <FontAwesomeIcon icon={faHouse} size="3x" color="#6a1b9a" />
-                <Typography
-                  variant="h6"
-                  sx={{
-                    marginTop: 2,
-                    fontWeight: 'bold',
-                    color: '#4a148c', // Darker purple for contrast
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  Houses
-                </Typography>
-                <Typography
-                  variant="h3"
-                  sx={{
-                    fontWeight: 'bold',
-                    color: '#6a1b9a',
-                    fontSize: '3rem',
-                    marginTop: '0.5rem',
-                  }}
-                >
-                  {houseCount}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#4a148c',
-                    fontStyle: 'italic',
-                    marginTop: '0.5rem',
-                  }}
-                >
-                  Total number of Houses
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-
-
-          {/* Vehicle */}
+          {/* Vehicles */}
           <Grid item xs={12} sm={6} md={4}>
             <Card
               sx={{
@@ -305,7 +113,7 @@ export default class Dashboard extends Component {
                   justifyContent: 'center',
                 }}
               >
-                <FontAwesomeIcon icon={faBuilding} size="3x" color="#1976d2" />
+                <FontAwesomeIcon icon={faCar} size="3x" color="#1976d2" />
                 <Typography
                   variant="h6"
                   sx={{
@@ -315,7 +123,7 @@ export default class Dashboard extends Component {
                     letterSpacing: '0.05em',
                   }}
                 >
-                  Vehicle
+                  Vehicles
                 </Typography>
                 <Typography
                   variant="h3"
@@ -326,7 +134,7 @@ export default class Dashboard extends Component {
                     marginTop: '0.5rem',
                   }}
                 >
-                  {VehicleCount}
+                  {vehicleCount}
                 </Typography>
                 <Typography
                   variant="body2"
@@ -336,13 +144,13 @@ export default class Dashboard extends Component {
                     marginTop: '0.5rem',
                   }}
                 >
-                  Total number of Vehicle
+                  Total number of vehicles
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          {/* User Count */}
+          {/* Users */}
           <Grid item xs={12} sm={6} md={4}>
             <Card
               sx={{
@@ -403,12 +211,12 @@ export default class Dashboard extends Component {
             </Card>
           </Grid>
 
-          {/* Employees */}
+          {/* Bookings */}
           <Grid item xs={12} sm={6} md={4}>
             <Card
               sx={{
-                backgroundColor: 'rgba(224, 247, 250, 0.5)', // Transparent gradient-like background
-                boxShadow: '0 8px 20px rgba(56, 142, 60, 0.5)', // Softer shadow
+                backgroundColor: 'rgba(255, 224, 178, 0.5)', // Transparent gradient-like background
+                boxShadow: '0 8px 20px rgba(230, 74, 25, 0.5)', // Softer orange shadow
                 borderRadius: 3,
                 transition: 'transform 0.3s ease-in-out', // Hover effect
                 backdropFilter: 'blur(10px)', // Blur effect for transparency
@@ -427,170 +235,42 @@ export default class Dashboard extends Component {
                   justifyContent: 'center',
                 }}
               >
-                <FontAwesomeIcon icon={faUsers} size="3x" color="#388e3c" />
+                <FontAwesomeIcon icon={faCalendarCheck} size="3x" color="#e64a19" />
                 <Typography
                   variant="h6"
                   sx={{
                     marginTop: 2,
                     fontWeight: 'bold',
-                    color: '#004d40', // Slightly darker green for contrast
+                    color: '#bf360c', // Darker orange for contrast
                     letterSpacing: '0.05em',
                   }}
                 >
-                  Employees
+                  Bookings
                 </Typography>
                 <Typography
                   variant="h3"
                   sx={{
                     fontWeight: 'bold',
-                    color: '#388e3c',
+                    color: '#e64a19',
                     fontSize: '3rem',
                     marginTop: '0.5rem',
                   }}
                 >
-                  {employeeCount}
+                  {bookingCount}
                 </Typography>
                 <Typography
                   variant="body2"
                   sx={{
-                    color: '#004d40',
+                    color: '#bf360c',
                     fontStyle: 'italic',
                     marginTop: '0.5rem',
                   }}
                 >
-                  Total number of employees
+                  Total number of bookings
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
-
-
-          {/* Maintainance Partners */}
-          <Grid item xs={12} sm={6} md={4}>
-            <Card
-              sx={{
-                backgroundColor: 'rgba(255, 245, 229, 0.5)', // Transparent gradient-like background
-                boxShadow: '0 8px 20px rgba(255, 152, 0, 0.5)', // Softer orange shadow
-                borderRadius: 3,
-                transition: 'transform 0.3s ease-in-out', // Hover effect
-                backdropFilter: 'blur(10px)', // Blur effect for transparency
-                '&:hover': {
-                  transform: 'scale(1.05)',
-                },
-              }}
-            >
-              <CardContent
-                sx={{
-                  textAlign: 'center',
-                  padding: '2rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <FontAwesomeIcon icon={faHammer} size="3x" color="#ff9800" />
-                <Typography
-                  variant="h6"
-                  sx={{
-                    marginTop: 2,
-                    fontWeight: 'bold',
-                    color: '#e65100', // Darker orange for contrast
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  Maintainance Partners
-                </Typography>
-                <Typography
-                  variant="h3"
-                  sx={{
-                    fontWeight: 'bold',
-                    color: '#ff9800',
-                    fontSize: '3rem',
-                    marginTop: '0.5rem',
-                  }}
-                >
-                  {inventoryCount}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#e65100',
-                    fontStyle: 'italic',
-                    marginTop: '0.5rem',
-                  }}
-                >
-                  Total number of Maintainance Partners
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-
-          {/* Property Owners */}
-          <Grid item xs={12} sm={6} md={4}>
-            <Card
-              sx={{
-                backgroundColor: 'rgba(255, 249, 196, 0.5)', // Transparent gradient-like background
-                boxShadow: '0 8px 20px rgba(251, 192, 45, 0.5)', // Softer yellow shadow
-                borderRadius: 3,
-                transition: 'transform 0.3s ease-in-out', // Hover effect
-                backdropFilter: 'blur(10px)', // Blur effect for transparency
-                '&:hover': {
-                  transform: 'scale(1.05)',
-                },
-              }}
-            >
-              <CardContent
-                sx={{
-                  textAlign: 'center',
-                  padding: '2rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <FontAwesomeIcon icon={faTruck} size="3x" color="#fbc02d" />
-                <Typography
-                  variant="h6"
-                  sx={{
-                    marginTop: 2,
-                    fontWeight: 'bold',
-                    color: '#f57f17', // Darker yellow for contrast
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  Property Owners
-                </Typography>
-                <Typography
-                  variant="h3"
-                  sx={{
-                    fontWeight: 'bold',
-                    color: '#fbc02d',
-                    fontSize: '3rem',
-                    marginTop: '0.5rem',
-                  }}
-                >
-                  {supplierCount}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#f57f17',
-                    fontStyle: 'italic',
-                    marginTop: '0.5rem',
-                  }}
-                >
-                  Total number of Property Owners
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-
-
-
 
           {/* Sales */}
           <Grid item xs={12} sm={6} md={4}>
@@ -616,7 +296,7 @@ export default class Dashboard extends Component {
                   justifyContent: 'center',
                 }}
               >
-                <FontAwesomeIcon icon={faSackDollar} size="3x" color="#6a1b9a" />
+                <FontAwesomeIcon icon={faDollarSign} size="3x" color="#6a1b9a" />
                 <Typography
                   variant="h6"
                   sx={{
@@ -637,7 +317,7 @@ export default class Dashboard extends Component {
                     marginTop: '0.5rem',
                   }}
                 >
-                  {SalesCount}
+                  {salesCount}
                 </Typography>
                 <Typography
                   variant="body2"
@@ -647,7 +327,7 @@ export default class Dashboard extends Component {
                     marginTop: '0.5rem',
                   }}
                 >
-                  Total Sales received
+                  Total sales received
                 </Typography>
               </CardContent>
             </Card>

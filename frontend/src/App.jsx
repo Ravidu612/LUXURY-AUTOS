@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 
 import Home from './Components/Home/Home';
+import BookingPage from './Components/Home/Bookingpage';
 import Login from './Components/Login/Login';
 import Vehicle from './Components/Home/Vehicle';
 import AboutUs from './Components/Home/AboutUs';
@@ -27,10 +28,8 @@ import BookingDetails from './Components/Admin/Booking/BookingDetails';
 import AddBooking from './Components/Admin/Booking/AddBooking';
 import UpdateBooking from './Components/Admin/Booking/UpdateBooking';
 import Booking from './Components/Admin/Booking/Booking';
-
 import { AuthProvider } from './Components/Auth/AuthContext';  // Import AuthProvider
 
-import PromotionPage from './Components/Home/PromotionPage';
 
 
 
@@ -48,10 +47,10 @@ function App() {
           <Route path='/about' element={<AboutUs />} />
           <Route path='/contact' element={<Contact />} />
           <Route path='/signup' element={<Register />} />
-          <Route path='/promotions' element={<PromotionPage />} />
           <Route path='/userprofile' element={<UserProfile />} />
           <Route path="/booking-confirmation" element={<BookingConfirmation />} />
-
+          <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+          <Route path="/booking" element={<BookingPage />} />
 
 
 
@@ -75,9 +74,9 @@ function App() {
             <Route path="update-user/:id" element={<UpdateUser />} />
 
             <Route path="Vehicle-management" element={<VehicleDetails />} />
-            <Route path="Vehicle/:MID" element={<Vehicle />} />
+            <Route path="Vehicle/:VID" element={<Vehicle />} />
             <Route path="add-Vehicle" element={<AddVehicle />} />
-            <Route path="update-Vehicle/:MID" element={<UpdateVehicle />} />
+            <Route path="update-Vehicle/:VID" element={<UpdateVehicle />} />
 
             <Route path="booking-management" element={<BookingDetails />} />
             <Route path="booking/:id" element={<Booking />} />

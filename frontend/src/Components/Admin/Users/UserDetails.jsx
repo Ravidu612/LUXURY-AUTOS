@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Paper, IconButton, Typography, ToggleButton, ToggleButtonGroup } from '@mui/material';
-import { Edit, Delete, Print, Add } from '@mui/icons-material';
+import { Edit, Delete, Print, Add, ArrowBack } from '@mui/icons-material';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import AddUser from './AddUser';
@@ -61,7 +61,7 @@ function UserDetails() {
     
     // Add the main topic as the title
     doc.setFontSize(18);
-    doc.text("SKY LIGHT CINEMA", 10, 10);
+    doc.text("LUXURY AUTOS", 10, 10);
     
     // Add a subtitle or description if needed
     doc.setFontSize(12);
@@ -152,6 +152,15 @@ function UserDetails() {
 
   return (
     <Box>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => navigate(-1)}
+        sx={{ marginBottom: 2, borderRadius: 2 }}
+        startIcon={<ArrowBack />}
+      >
+        Back
+      </Button>
       {showAddUserForm ? (
         <Box>
           <AddUser onBack={handleBack} />
@@ -198,7 +207,7 @@ function UserDetails() {
               sx={{ borderRadius: 2, marginLeft: 2 }}
               startIcon={<Add />}
             >
-              Add User
+              Add Admin
             </Button>
           </Box>
 

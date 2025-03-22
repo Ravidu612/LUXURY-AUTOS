@@ -4,38 +4,44 @@ import axios from 'axios';
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-const URL = "http://localhost:4000/bookings";
+const URL = "http://localhost:4000/vehicle-bookings";
 
-// eslint-disable-next-line react/prop-types
 function AddBooking({ onBack }) {
-  const [TicketId, setTicketId] = useState('');
-  const [count, setCount] = useState(1); // Default to 1
-  const [movieId, setMovieId] = useState('');
-  const [userId, setUserId] = useState('');
-  const [showTimeId, setShowTimeId] = useState('10:30'); // Default to '10:30'
+  const [pickupLocation, setPickupLocation] = useState('');
   const [date, setDate] = useState('');
-  const [seat, setSeat] = useState('');
+  const [vehicleType, setVehicleType] = useState('');
+  const [vehicleName, setVehicleName] = useState('');
+  const [price, setPrice] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null); // Reset error state
+    setError(null);
+
+    // Date range validation: dateFrom should be before dateTo
+    if (new Date(dateFrom) >= new Date(dateTo)) {
+      setError('Date From must be earlier than Date To');
+      return;
+    }
 
     try {
-      const response = await axios.post(URL, { 
-        TicketId, 
-        count: Number(count), // Convert to number
-        movieId, 
-        userId, 
-        showTimeId, 
-        date, 
-        seat 
+      const response = await axios.post(URL, {
+        pickupLocation,
+        date,
+        vehicleType,
+        vehicleName,
+        price: Number(price),
+        dateFrom,
+        dateTo
       });
+
       if (response.status === 201) {
-        alert('Booking added successfully');
-        navigate('/admindashboard/booking-management');
+        alert('Vehicle booking added successfully');
+        navigate('/admindashboard/vehicle-booking-management');
       }
     } catch (error) {
       setError(error.response ? error.response.data.message : 'An error occurred');
@@ -45,81 +51,78 @@ function AddBooking({ onBack }) {
   return (
     <Box sx={{ padding: 3, backgroundColor: 'white', borderRadius: 1 }}>
       <Typography variant="h5" gutterBottom>
-        Add New Booking
+        Add New Vehicle Booking
       </Typography>
       <form onSubmit={handleSubmit}>
         <TextField
-          label="Ticket ID"
+          label="Pick-up Location"
           variant="outlined"
-          value={TicketId}
-          onChange={(e) => setTicketId(e.target.value)}
+          value={pickupLocation}
+          onChange={(e) => setPickupLocation(e.target.value)}
           fullWidth
           margin="normal"
           required
         />
         <TextField
-          label="Count"
-          variant="outlined"
-          type="number"
-          value={count}
-          onChange={(e) => setCount(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-          inputProps={{ min: 1 }}
-        />
-        <TextField
-          label="Movie ID"
-          variant="outlined"
-          value={movieId}
-          onChange={(e) => setMovieId(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label="User ID"
-          variant="outlined"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label="Show Time"
-          variant="outlined"
-          select
-          SelectProps={{ native: true }}
-          value={showTimeId}
-          onChange={(e) => setShowTimeId(e.target.value)}
-          fullWidth
-          margin="normal"
-        >
-          <option value="10:30">10:30</option>
-          <option value="13:30">13:30</option>
-          <option value="16:30">16:30</option>
-        </TextField>
-        <TextField
-          label="Date"
+          label="Booking Date"
           variant="outlined"
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
           fullWidth
           margin="normal"
-          InputLabelProps={{
-            shrink: true,
-          }}
+          InputLabelProps={{ shrink: true }}
           required
         />
         <TextField
-          label="Seat"
+          label="Vehicle Type"
           variant="outlined"
-          value={seat}
-          onChange={(e) => setSeat(e.target.value)}
+          value={vehicleType}
+          onChange={(e) => setVehicleType(e.target.value)}
           fullWidth
           margin="normal"
+          required
+        />
+        <TextField
+          label="Vehicle Name"
+          variant="outlined"
+          value={vehicleName}
+          onChange={(e) => setVehicleName(e.target.value)}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <TextField
+          label="Price"
+          variant="outlined"
+          type="number"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          fullWidth
+          margin="normal"
+          required
+          inputProps={{ min: 0 }}
+        />
+        <TextField
+          label="Date From"
+          variant="outlined"
+          type="date"
+          value={dateFrom}
+          onChange={(e) => setDateFrom(e.target.value)}
+          fullWidth
+          margin="normal"
+          InputLabelProps={{ shrink: true }}
+          required
+        />
+        <TextField
+          label="Date To"
+          variant="outlined"
+          type="date"
+          value={dateTo}
+          onChange={(e) => setDateTo(e.target.value)}
+          fullWidth
+          margin="normal"
+          InputLabelProps={{ shrink: true }}
           required
         />
         <Button

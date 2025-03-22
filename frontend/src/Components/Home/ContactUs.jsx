@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { Container, Typography, Box, Grid, IconButton } from '@mui/material';
-import { Facebook, Instagram, Twitter, LinkedIn } from '@mui/icons-material'; // Correct import for MUI icons
+import { Facebook, Instagram, Twitter, LinkedIn } from '@mui/icons-material';
 import Header from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 
@@ -20,7 +20,7 @@ function ContactUs() {
           <Grid item xs={12} md={6}>
             <Box sx={{ textAlign: 'center', marginBottom: 4 }}>
               <Typography variant="body1" paragraph>
-                We would love to hear from you! Whether you have a question, feedback, or simply want to say hello, feel free to reach out using the information below.
+                Have questions about our luxury vehicles or services? Get in touch with us using the details below.
               </Typography>
 
               {/* Address Section */}
@@ -28,7 +28,7 @@ function ContactUs() {
                 Our Address:
               </Typography>
               <Typography variant="body1" gutterBottom>
-                Skylight Cinema, 12/2 Malabe Kaduwela
+                Luxury Autos, 15 Marine Drive, Kollupitiya
               </Typography>
 
               {/* Phone Section */}
@@ -36,7 +36,7 @@ function ContactUs() {
                 Phone:
               </Typography>
               <Typography variant="body1" gutterBottom>
-                (123) 456-7890
+                (011) 789-4561
               </Typography>
 
               {/* Email Section */}
@@ -44,8 +44,8 @@ function ContactUs() {
                 Email:
               </Typography>
               <Typography variant="body1" gutterBottom>
-                <a href="mailto:SkyLightCinema@gmail.com" style={{ color: 'inherit', textDecoration: 'underline' }}>
-                  SkyLightCinema@gmail.com
+                <a href="mailto:LuxuryAutos.lk@gmail.com" style={{ color: 'inherit', textDecoration: 'underline' }}>
+                  LuxuryAutos.lk@gmail.com
                 </a>
               </Typography>
 
@@ -54,10 +54,10 @@ function ContactUs() {
                 Business Hours:
               </Typography>
               <Typography variant="body1">
-                Monday - Friday: 7:00 AM - 23:00 PM
+                Monday - Friday: 9:00 AM - 8:00 PM
               </Typography>
               <Typography variant="body1">
-                Saturday - Sunday: 9:00 AM - 22:00 PM
+                Saturday - Sunday: 10:00 AM - 6:00 PM
               </Typography>
 
               {/* Social Media Links Section */}
@@ -87,8 +87,8 @@ function ContactUs() {
           <Grid item xs={12} md={6}>
             <Box sx={{ display: 'flex', justifyContent: 'center', height: '100%' }}>
               <iframe
-                title="Skylight Cinema Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.835434509497!2d144.95373531550425!3d-37.81627977975179!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad642af0f11fd81%3A0xf5779c8e6dfc58b1!2sSkylight%20Cinema!5e0!3m2!1sen!2sus!4v1638325441267!5m2!1sen!2sus"
+                title="Luxury Autos Location"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.835434509497!2d144.95373531550425!3d-37.81627977975179!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad642af0f11fd81%3A0xf5779c8e6dfc58b1!2sLuxury%20Autos!5e0!3m2!1sen!2sus!4v1638325441267!5m2!1sen!2sus"
                 width="100%"
                 height="400"
                 style={{ border: 0 }}

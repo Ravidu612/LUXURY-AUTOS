@@ -37,14 +37,13 @@ const VehicleDetails = () => {
     
     // ...existing code...
     useEffect(() => {
-        setFilteredVehicles(
-            vehicles.filter(v =>
-                (filterType ? v.type === filterType : true) &&
-                (filterTransmission ? v.transmission === filterTransmission : true) &&
-                (filterFuel ? v.fuel === filterFuel : true) &&
-                (search ? v.name.toLowerCase().includes(search.toLowerCase()) : true)
-            )
+        const filtered = vehicles.filter(v =>
+            (filterType ? v.type === filterType : true) &&
+            (filterTransmission ? v.transmission === filterTransmission : true) &&
+            (filterFuel ? v.fuel === filterFuel : true) &&
+            (search ? v.name.toLowerCase().includes(search.toLowerCase()) : true)
         );
+        setFilteredVehicles(filtered);
     }, [vehicles, filterType, filterTransmission, filterFuel, search]);
 
     const handleSearchChange = (e) => setSearch(e.target.value);
