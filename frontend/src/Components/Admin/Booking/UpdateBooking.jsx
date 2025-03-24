@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Box, Select, MenuItem, TextField, Button, Typography, Snackbar, Alert, CircularProgress } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 
-const URL = "http://localhost:4000/bookings"; // Make sure this URL points to the vehicle booking API
+const URL = "http://localhost:4000/vehicle-bookings";
 
 function UpdateBooking() {
     const { id } = useParams();

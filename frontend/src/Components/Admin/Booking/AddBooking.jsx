@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-const URL = "http://localhost:4000/vehicle-bookings";
+const URL = "http://localhost:4000/vehicle-booking";
 
 function AddBooking({ onBack }) {
   const [pickupLocation, setPickupLocation] = useState('');

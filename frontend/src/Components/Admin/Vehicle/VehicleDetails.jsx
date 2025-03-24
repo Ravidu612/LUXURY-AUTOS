@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardMedia, Typography, Button, Grid, TextField, Select, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import jsPDF from "jspdf";
-import { vehicles as initialVehicles } from "../Database/Data";
 import axios from 'axios';
 
 const VehicleDetails = () => {
-    const [vehicles, setVehicles] = useState(initialVehicles);
+    const [vehicles, setVehicles] = useState([]);
     const [search, setSearch] = useState("");
     const [filterType, setFilterType] = useState("");
     const [filterTransmission, setFilterTransmission] = useState("");
@@ -13,20 +12,36 @@ const VehicleDetails = () => {
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [openForm, setOpenForm] = useState(false);
     const [newVehicle, setNewVehicle] = useState({ name: "", type: "", fuel: "", seats: "", transmission: "", price: "", image: "" });
-    const [filteredVehicles, setFilteredVehicles] = useState(initialVehicles);
+    const [filteredVehicles, setFilteredVehicles] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
-    
+
+    useEffect(() => {
+        // Fetch vehicles from the backend
+        const fetchVehicles = async () => {
+            try {
+                const response = await axios.get('http://localhost:4000/Vehicles');
+                setVehicles(response.data);
+                setFilteredVehicles(response.data);
+            } catch (error) {
+                console.error("There was an error fetching the vehicles!", error);
+            }
+        };
+
+        fetchVehicles();
+    }, []);
+
     const handleAddVehicle = async () => {
         if (!newVehicle.name || !newVehicle.type || !newVehicle.fuel || !newVehicle.seats || !newVehicle.transmission || !newVehicle.price || !newVehicle.image) {
             alert("Please fill all fields!");
             return;
         }
-    
+
         try {
             const response = await axios.post('http://localhost:4000/Vehicles', newVehicle);
-            const newEntry = response.data.Vehicle;
+            const newEntry = response.data;
             setVehicles([...vehicles, newEntry]);
-    
+            setFilteredVehicles([...vehicles, newEntry]);
+
             setOpenForm(false);
             setNewVehicle({ name: "", type: "", fuel: "", seats: "", transmission: "", price: "", image: "" });
         } catch (error) {
@@ -34,8 +49,7 @@ const VehicleDetails = () => {
             alert("There was an error adding the vehicle!");
         }
     };
-    
-    // ...existing code...
+
     useEffect(() => {
         const filtered = vehicles.filter(v =>
             (filterType ? v.type === filterType : true) &&
@@ -55,8 +69,15 @@ const VehicleDetails = () => {
         setVehicles(vehicles.map(v => v.id === id ? { ...v, status: v.status === "Available" ? "Unavailable" : "Available" } : v));
     };
 
-    const handleDelete = (id) => {
-        setVehicles(vehicles.filter(v => v.id !== id));
+    const handleDelete = async (id) => {
+        try {
+            await axios.delete(`http://localhost:4000/Vehicles/${id}`);
+            setVehicles(vehicles.filter(v => v.id !== id));
+            setFilteredVehicles(vehicles.filter(v => v.id !== id));
+        } catch (error) {
+            console.error("There was an error deleting the vehicle!", error);
+            alert("There was an error deleting the vehicle!");
+        }
     };
 
     const handleInputChange = (e) => {
@@ -73,17 +94,24 @@ const VehicleDetails = () => {
         setOpenForm(true);
     };
 
-    const handleUpdateVehicle = () => {
+    const handleUpdateVehicle = async () => {
         if (!newVehicle.name || !newVehicle.type || !newVehicle.fuel || !newVehicle.seats || !newVehicle.transmission || !newVehicle.price || !newVehicle.image) {
             alert("Please fill all fields!");
             return;
         }
 
-        setVehicles(vehicles.map(v => v.id === newVehicle.id ? newVehicle : v));
+        try {
+            const response = await axios.put(`http://localhost:4000/Vehicles/${newVehicle.id}`, newVehicle);
+            setVehicles(vehicles.map(v => v.id === newVehicle.id ? response.data : v));
+            setFilteredVehicles(vehicles.map(v => v.id === newVehicle.id ? response.data : v));
 
-        setOpenForm(false);
-        setIsEditing(false);
-        setNewVehicle({ name: "", type: "", fuel: "", seats: "", transmission: "", price: "", image: "" });
+            setOpenForm(false);
+            setIsEditing(false);
+            setNewVehicle({ name: "", type: "", fuel: "", seats: "", transmission: "", price: "", image: "" });
+        } catch (error) {
+            console.error("There was an error updating the vehicle!", error);
+            alert("There was an error updating the vehicle!");
+        }
     };
 
     const handleDownloadPDF = (vehicle) => {
