@@ -29,8 +29,7 @@ import AddBooking from './Components/Admin/Booking/AddBooking';
 import UpdateBooking from './Components/Admin/Booking/UpdateBooking';
 import Booking from './Components/Admin/Booking/Booking';
 import { AuthProvider } from './Components/Auth/AuthContext';  // Import AuthProvider
-
-
+import RentalDashboard from './Components/Admin/Rental/RentalList';
 
 
 function App() {
@@ -65,6 +64,12 @@ function App() {
             <Route path="user-management" element={<UserDetails />} />
             <Route path="owner-management" element={<Owner />} />
             <Route path="customer-management" element={<Customer />} />
+          </Route>
+
+          <Route path="/rental-list" element={<RentalDashboard />} >
+            <Route path="-" element={<UserDetails />} />
+            <Route path="-" element={<Owner />} />
+            <Route path="-" element={<Customer />} />
           </Route>
 
           <Route path="/admindashboard" element={<AdminDashboard />}>

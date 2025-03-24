@@ -3,43 +3,43 @@ import axios from 'axios';
 import { Box, Typography, Paper, Divider } from '@mui/material';
 import { useParams } from 'react-router-dom';
 
-const URL = "http://localhost:4000/users";
+const URL = "http://localhost:4000/sales";
 
-function User() {
-    const { userId } = useParams();
-    const [user, setUser] = useState(null);
+function Sale() {
+    const { saleId } = useParams();
+    const [sale, setSale] = useState(null);
 
     useEffect(() => {
-        const fetchUser = async () => {
+        const fetchSale = async () => {
             try {
-                const response = await axios.get(`${URL}/${userId}`);
-                setUser(response.data);
+                const response = await axios.get(`${URL}/${saleId}`);
+                setSale(response.data);
             } catch (error) {
-                console.error('Error fetching user details:', error);
+                console.error('Error fetching sale details:', error);
             }
         };
 
-        fetchUser();
-    }, [userId]);
+        fetchSale();
+    }, [saleId]);
 
-    if (!user) return <Typography>Loading...</Typography>;
+    if (!sale) return <Typography>Loading...</Typography>;
 
     return (
         <Box sx={{ padding: 3 }}>
             <Typography variant="h4" gutterBottom>
-                User Details
+                Sale Details
             </Typography>
             <Divider sx={{ marginBottom: 2 }} />
             <Paper sx={{ padding: 3 }}>
-                <Typography variant="h6">ID: {user.userId}</Typography>
-                <Typography variant="h6">Username: {user.userName}</Typography>
-                <Typography variant="h6">Name: {user.name}</Typography>
-                <Typography variant="h6">Email: {user.email}</Typography>
-                <Typography variant="h6">Phone: {user.phone}</Typography>
-                <Typography variant="h6">Type: {user.type}</Typography>
+                <Typography variant="h6">ID: {sale._id}</Typography>
+                <Typography variant="h6">Vehicle ID: {sale.vehicleId}</Typography>
+                <Typography variant="h6">Customer ID: {sale.customerId}</Typography>
+                <Typography variant="h6">Rental Period: {sale.rentalPeriod} days</Typography>
+                <Typography variant="h6">Total Amount: ${sale.totalAmount}</Typography>
+                <Typography variant="h6">Payment Status: {sale.paymentStatus}</Typography>
             </Paper>
         </Box>
     );
 }
 
-export default User;
+export default Sale;
