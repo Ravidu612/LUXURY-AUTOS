@@ -1,61 +1,87 @@
-const Vehicle = require('../Model/VehicleModel');
+const Vehicle = require('../Model/vehicleModel');
 
-// Genefuel Vehicle ID with leading zeros
-const genefuelVehicleId = async () => {
-    const lastVehicle = await Vehicle.findOne().sort({ VID: -1 }).limit(1);
-    const lastId = lastVehicle ? parseInt(lastVehicle.VID.replace('V', ''), 10) : 0;
+// Generate Vehicle ID with leading zeros
+const generateVehicleId = async () => {
+    const lastVehicle = await Vehicle.findOne().sort({ vehicleId: -1 }).limit(1);
+    const lastId = lastVehicle ? parseInt(lastVehicle.vehicleId.replace('V', ''), 10) : 0;
     const newId = `V${(lastId + 1).toString().padStart(3, '0')}`; // Adjust padding as needed
     return newId;
 };
 
-// Create a new Vehicle item
+// Create a new vehicle
 exports.createVehicle = async (req, res) => {
     try {
-        const {image, name, fuel, seating, transmission,price,status  } = req.body;
-        const VID = await genefuelVehicleId(); // Genefuel new Vehicle ID
-        const newVehicle = new Vehicle({ VID,  name, fuel, seating, transmission,price,status  });
+        const { image, name, type, fuel, seats, transmission, price, status, ownerID } = req.body;
+
+        // Check if all required fields are provided
+        if (!name || !type || !fuel || !seats || !transmission || !price || !status || !ownerID) {
+            return res.status(400).json({ message: 'All fields except image are required' });
+        }
+
+        // If image is provided, validate that it's a URL (simple validation)
+        if (image && !/^https?:\/\/.+\.(jpg|jpeg|png|gif|bmp)$/.test(image)) {
+            return res.status(400).json({ message: 'Invalid image URL' });
+        }
+
+        // Generate a new Vehicle ID
+        const vehicleId = await generateVehicleId();
+
+        // Create a new vehicle document
+        const newVehicle = new Vehicle({
+            vehicleId,
+            image, // Image URL will be stored
+            name,
+            type,
+            fuel,
+            seats,
+            transmission,
+            price,
+            status,
+            ownerID,
+        });
+
+        // Save the new vehicle to the database
         await newVehicle.save();
 
-        res.status(201).json({ message: 'Vehicle created successfully', Vehicle: newVehicle });
+        // Send success response
+        res.status(201).json({ message: 'Vehicle created successfully', vehicle: newVehicle });
     } catch (error) {
-        res.status(500).json({ message: 'Error creating Vehicle', error });
+        console.error('Error creating vehicle:', error);
+        res.status(500).json({ message: 'Error creating vehicle', error });
     }
 };
 
-// Get all Vehicle items
-exports.getAllVehicle = async (req, res) => {
+
+// Get all vehicles
+exports.getAllVehicles = async (req, res) => {
     try {
-        const Vehicles = await Vehicle.find();
-        res.status(200).json(Vehicles);
+        const vehicles = await Vehicle.find();
+        res.status(200).json(vehicles);
     } catch (error) {
-        res.status(500).json({ message: 'Error retrieving Vehicle', error });
+        res.status(500).json({ message: 'Error retrieving vehicles', error });
     }
 };
 
-// Get a single Vehicle item by ID
+// Get vehicle by ID
 exports.getVehicleById = async (req, res) => {
-    const id = req.params.id;
-
     try {
-        const Vehicle = await Vehicle.findById(id);
-        if (!Vehicle) {
+        const vehicle = await Vehicle.findById(req.params.id);
+        if (!vehicle) {
             return res.status(404).json({ message: 'Vehicle not found' });
         }
-        res.status(200).json(Vehicle);
+        res.status(200).json(vehicle);
     } catch (error) {
-        res.status(500).json({ message: 'Error retrieving Vehicle', error });
+        res.status(500).json({ message: 'Error retrieving vehicle', error });
     }
 };
 
-// Update a Vehicle item by ID
+// Update vehicle by ID
 exports.updateVehicle = async (req, res) => {
-    const id = req.params.id;
-    const { name, fuel, seating, transmission,price,status  } = req.body;
-
     try {
+        const { image, name, type, fuel, seats, transmission, price, status, ownerID } = req.body;
         const updatedVehicle = await Vehicle.findByIdAndUpdate(
-            id,
-            {  name, fuel, seating, transmission,price,status  },
+            req.params.id,
+            { image, name, type, fuel, seats, transmission, price, status, ownerID },
             { new: true } // Return the updated Vehicle
         );
 
@@ -63,24 +89,22 @@ exports.updateVehicle = async (req, res) => {
             return res.status(404).json({ message: 'Vehicle not found' });
         }
 
-        res.status(200).json({ message: 'Vehicle updated successfully', Vehicle: updatedVehicle });
+        res.status(200).json({ message: 'Vehicle updated successfully', vehicle: updatedVehicle });
     } catch (error) {
-        res.status(500).json({ message: 'Error updating Vehicle', error });
+        res.status(500).json({ message: 'Error updating vehicle', error });
     }
 };
 
-// Delete a Vehicle item by ID
+// Delete vehicle by ID
 exports.deleteVehicle = async (req, res) => {
-    const id = req.params.id;
-
     try {
-        const deletedVehicle = await Vehicle.findByIdAndDelete(id);
+        const deletedVehicle = await Vehicle.findByIdAndDelete(req.params.id);
         if (!deletedVehicle) {
             return res.status(404).json({ message: 'Vehicle not found' });
         }
 
         res.status(200).json({ message: 'Vehicle deleted successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Error deleting Vehicle', error });
+        res.status(500).json({ message: 'Error deleting vehicle', error });
     }
 };
