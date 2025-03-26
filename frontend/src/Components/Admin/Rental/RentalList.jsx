@@ -4,12 +4,12 @@ import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
-import { AuthContext } from '../Auth/AuthContext'; // Import your AuthContext
+import { AuthContext } from '../../Auth/AuthContext'; // Import your AuthContext
 
 const drawerWidth = 210;
 const sidebarBackground = 'path_to_image'; // Replace with actual image URL or import statement
 
-function AdminDashboard() {
+function RentalDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useContext(AuthContext); // Access logout function from AuthContext
@@ -20,10 +20,13 @@ function AdminDashboard() {
 
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/admindashboard/dashboard' },
-    { text: 'Users Management', icon: <PeopleIcon />, path: '/user-list/user-management' },
-    { text: 'Vehicle Management', icon: <DashboardIcon />, path: '/admindashboard/Vehicle-management' },
-    { text: 'Booking Management', icon: <ConfirmationNumberIcon />, path: '/admindashboard/booking-management' },
-    { text: 'Rental Management', icon: <ConfirmationNumberIcon />, path: '/rental-list' },
+    { text: 'Rental Records', icon: <DashboardIcon />, path: '/rental-management/Rental' },
+    { text: 'Payments & Receipts', icon: <DashboardIcon />, path: '/rental-management/payments&receipts' },
+    { text: 'Contracts & Agreements', icon: <DashboardIcon />, path: '/rental-management/ContractsAndAgreements' },
+    { text: 'Financial Transactions', icon: <DashboardIcon />, path: '/rental-management/financialtransaction' },
+    { text: 'Transaction Status', icon: <DashboardIcon />, path: '/rental-management/TransactionStatus' },
+    
+    
   ];
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -126,4 +129,4 @@ function AdminDashboard() {
   );
 }
 
-export default AdminDashboard;
+export default RentalDashboard;

@@ -8,6 +8,7 @@ import { Box, Button, Container, Grid, TextField, Typography, Paper, Divider } f
 import LockIcon from '@mui/icons-material/Lock';
 import PersonIcon from '@mui/icons-material/Person';
 import log from '../Images/car.png';
+
 function Login() {
     const navigate = useNavigate();
     const { login } = useContext(AuthContext);
@@ -103,7 +104,7 @@ function Login() {
                                     name="password"
                                     value={user.password}
                                     onChange={handleInputChange}
-                                    InputAdornment={{
+                                    InputProps={{
                                         startAdornment: <LockIcon sx={{ color: '#0072FF', mr: 1 }} />,
                                     }}
                                     sx={{ mb: 3 }}
