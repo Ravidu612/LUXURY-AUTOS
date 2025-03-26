@@ -1,160 +1,136 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import axios from 'axios';
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Paper,
-  Grid,
-  Snackbar,
-  Alert,
-} from '@mui/material';
+import { Box, Button, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-const URL = "http://localhost:4000/vehicle-booking"; // Update the endpoint if necessary
+const URL = "http://localhost:4000/vehiclebookings";
 
 function AddBooking({ onBack }) {
   const [bookingId, setBookingId] = useState('');
   const [customerId, setCustomerId] = useState('');
   const [vehicleId, setVehicleId] = useState('');
   const [pickUpLocation, setPickUpLocation] = useState('');
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState('Pending'); // Default to 'Pending'
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
 
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
 
     try {
-      const newBooking = {
-        BookingId: bookingId,
+      const response = await axios.post(URL, { 
+        bookingId,
         customerId,
         vehicleId,
         pickUpLocation,
         status,
         dateFrom,
-        dateTo,
-      };
-
-      const response = await axios.post(URL, newBooking);
-      if (response.status !== 201) {
-        throw new Error('Failed to add booking. Please try again.');
+        dateTo 
+      });
+      if (response.status === 201) {
+        alert('Booking added successfully');
+        navigate('/admindashboard/booking-management');
       }
-      setSuccess(true);
-      setTimeout(() => {
-        navigate('/admin/bookings'); // Redirect to bookings page
-      }, 2000);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Error adding booking');
+    } catch (error) {
+      setError(error.response ? error.response.data.message : 'An error occurred');
     }
   };
 
   return (
-    <Box sx={{ padding: 3 }}>
+    <Box sx={{ padding: 3, backgroundColor: 'white', borderRadius: 1 }}>
       <Typography variant="h5" gutterBottom>
         Add New Booking
       </Typography>
-      {error && <Alert severity="error">{error}</Alert>}
-      {success && (
-        <Snackbar open={success} autoHideDuration={6000}>
-          <Alert severity="success" sx={{ width: '100%' }}>
-            Booking added successfully!
-          </Alert>
-        </Snackbar>
-      )}
-      <Paper sx={{ padding: 3, marginTop: 2 }}>
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                id="booking-id" // Added id
-                label="Booking ID"
-                value={bookingId}
-                onChange={(e) => setBookingId(e.target.value)}
-                fullWidth
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                id="customer-id" // Added id
-                label="Customer ID"
-                value={customerId}
-                onChange={(e) => setCustomerId(e.target.value)}
-                fullWidth
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                id="vehicle-id" // Added id
-                label="Vehicle ID"
-                value={vehicleId}
-                onChange={(e) => setVehicleId(e.target.value)}
-                fullWidth
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                id="pickup-location" // Added id
-                label="Pickup Location"
-                value={pickUpLocation}
-                onChange={(e) => setPickUpLocation(e.target.value)}
-                fullWidth
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                id="status" // Added id
-                label="Status"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                fullWidth
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                id="date-from" // Added id
-                label="Date From"
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                id="date-to" // Added id
-                label="Date To"
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                required
-              />
-            </Grid>
-          </Grid>
-          <Box sx={{ marginTop: 3, display: 'flex', justifyContent: 'space-between' }}>
-            <Button variant="contained" color="secondary" onClick={onBack}>
-              Back
-            </Button>
-            <Button type="submit" variant="contained" color="primary">
-              Add Booking
-            </Button>
-          </Box>
-        </form>
-      </Paper>
+      <form onSubmit={handleSubmit}>
+        <TextField
+          label="Booking ID"
+          variant="outlined"
+          value={bookingId}
+          onChange={(e) => setBookingId(e.target.value)}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <TextField
+          label="Customer ID"
+          variant="outlined"
+          value={customerId}
+          onChange={(e) => setCustomerId(e.target.value)}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <TextField
+          label="Vehicle ID"
+          variant="outlined"
+          value={vehicleId}
+          onChange={(e) => setVehicleId(e.target.value)}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <TextField
+          label="Pick-up Location"
+          variant="outlined"
+          value={pickUpLocation}
+          onChange={(e) => setPickUpLocation(e.target.value)}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <TextField
+          label="Status"
+          variant="outlined"
+          select
+          SelectProps={{ native: true }}
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          fullWidth
+          margin="normal"
+        >
+          <option value="Pending">Pending</option>
+          <option value="Confirmed">Confirmed</option>
+          <option value="Cancelled">Cancelled</option>
+        </TextField>
+        <TextField
+          label="Date From"
+          variant="outlined"
+          type="date"
+          value={dateFrom}
+          onChange={(e) => setDateFrom(e.target.value)}
+          fullWidth
+          margin="normal"
+          InputLabelProps={{ shrink: true }}
+          required
+        />
+        <TextField
+          label="Date To"
+          variant="outlined"
+          type="date"
+          value={dateTo}
+          onChange={(e) => setDateTo(e.target.value)}
+          fullWidth
+          margin="normal"
+          InputLabelProps={{ shrink: true }}
+          required
+        />
+        <Button type="submit" variant="contained" color="primary" sx={{ marginTop: 2 }}>
+          Add Booking
+        </Button>
+        <Button variant="outlined" color="secondary" sx={{ marginTop: 2, marginLeft: 2 }} onClick={onBack}>
+          Back
+        </Button>
+        {error && (
+          <Typography color="error" sx={{ marginTop: 2 }}>
+            {error}
+          </Typography>
+        )}
+      </form>
     </Box>
   );
 }

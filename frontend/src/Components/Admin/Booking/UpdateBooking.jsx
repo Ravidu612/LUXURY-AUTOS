@@ -1,171 +1,165 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Box, Select, MenuItem, TextField, Button, Typography, Snackbar, Alert, CircularProgress } from '@mui/material';
-import { useParams, useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Paper,
+  IconButton,
+  ToggleButtonGroup,
+  ToggleButton,
+  Typography,
+  Snackbar,
+  Alert,
+} from '@mui/material';
+import { Edit, Delete, Print } from '@mui/icons-material';
+import { BarChartOutlined } from '@mui/icons-material';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { useNavigate } from 'react-router-dom';
 
-const URL = "http://localhost:4000/vehicle-booking";
+const URL = "http://localhost:4000/vehiclebookings";
 
-function UpdateBooking() {
-    const { id } = useParams();
-    const [booking, setBooking] = useState({
-        BookingId: '',
-        count: '',
-        vehicleType: '',
-        pickupTime: '',
-        date: '',
-        seatType: '',
-    });
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(false);
-    const [openSnackbar, setOpenSnackbar] = useState(false);
-    const navigate = useNavigate();
+const fetchBookings = async () => {
+  try {
+    const response = await axios.get(URL);
+    return Array.isArray(response.data) ? response.data : [response.data];
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    throw error;
+  }
+};
 
-    const availableVehicles = ["Sedan", "SUV", "Truck", "Van"];
-    const availablePickupTimes = ["09:00", "12:00", "15:00", "18:00", "21:00"];
-    const currentDate = new Date().toISOString().split("T")[0];
+function BookingDetails() {
+  const [bookings, setBookings] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState('bookings');
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchBooking = async () => {
-            try {
-                const response = await axios.get(`${URL}/${id}`);
-                setBooking(response.data);
-                setLoading(false);
-            } catch (error) {
-                setError(error.response ? error.response.data.message : 'An error occurred');
-                setLoading(false);
-            }
-        };
+  useEffect(() => {
+    fetchBookings().then(setBookings).catch(setError);
+  }, []);
 
-        fetchBooking();
-    }, [id]);
+  const handleEdit = (id) => {
+    navigate(`/update-booking/${id}`);
+  };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setBooking({ ...booking, [name]: value });
-    };
+  const deleteBooking = async (id) => {
+    try {
+      await axios.delete(`${URL}/${id}`);
+      setBookings((prev) => prev.filter((booking) => booking._id !== id));
+      setSuccess(true);
+      setOpenSnackbar(true);
+    } catch (error) {
+      setError("Error deleting booking");
+    }
+  };
 
-    const handleUpdate = async () => {
-        if (!booking.count || !booking.vehicleType || !booking.pickupTime || !booking.seatType || !booking.date) {
-            setError('All fields are required!');
-            return;
-        }
-
-        try {
-            setLoading(true);
-            await axios.put(`${URL}/${id}`, booking);
-            setSuccess(true);
-            setOpenSnackbar(true);
-            setTimeout(() => {
-                navigate('/admindashboard/vehicle-booking');
-            }, 2000);
-        } catch (error) {
-            setError(error.response ? error.response.data.message : 'An error occurred');
-            setLoading(false);
-        }
-    };
-
-    if (loading && !success) {
-        return <CircularProgress />;
+  const handlePDF = () => {
+    if (bookings.length === 0) {
+      alert("No bookings available for download.");
+      return;
     }
 
-    return (
-        <Box sx={{ padding: 3, backgroundColor: 'white', borderRadius: 1 }}>
-            <Typography variant="h6" gutterBottom>Update Vehicle Booking</Typography>
-            <TextField
-                label="Booking ID"
-                name="BookingId"
-                value={booking.BookingId}
-                onChange={handleChange}
-                fullWidth
-                margin="normal"
-                disabled
-            />
-            <TextField
-                label="Count"
-                name="count"
-                value={booking.count}
-                onChange={handleChange}
-                fullWidth
-                margin="normal"
-                type="number"
-                inputProps={{ min: 1 }}
-            />
-            <Select
-                name="vehicleType"
-                value={booking.vehicleType}
-                onChange={handleChange}
-                fullWidth
-                margin="normal"
-                sx={{ marginBottom: 3 }}
-            >
-                {availableVehicles.map(vehicle => (
-                    <MenuItem key={vehicle} value={vehicle}>{vehicle}</MenuItem>
+    const doc = new jsPDF();
+    doc.text("Vehicle Booking Report", 10, 10);
+    doc.autoTable({
+      head: [['Booking ID', 'Customer ID', 'Vehicle ID', 'Pick-up Location', 'Status', 'Date From', 'Date To']],
+      body: bookings.map(item => [
+        item.bookingId,
+        item.customerId,
+        item.vehicleId,
+        item.pickUpLocation,
+        item.status,
+        new Date(item.dateFrom).toLocaleDateString(),
+        new Date(item.dateTo).toLocaleDateString(),
+      ]),
+    });
+    doc.save('booking-details.pdf');
+  };
+
+  return (
+    <Box>
+      <ToggleButtonGroup
+        value={viewMode}
+        exclusive
+        onChange={(e, newView) => newView && setViewMode(newView)}
+        sx={{ marginBottom: 2 }}
+      >
+        <ToggleButton value="bookings"><Typography>Bookings</Typography></ToggleButton>
+        <ToggleButton value="analysis"><BarChartOutlined /> Analysis</ToggleButton>
+      </ToggleButtonGroup>
+
+      {viewMode === 'bookings' ? (
+        <>
+          <TextField
+            label="Search"
+            variant="outlined"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{ marginBottom: 2 }}
+          />
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Booking ID</TableCell>
+                  <TableCell>Customer ID</TableCell>
+                  <TableCell>Vehicle ID</TableCell>
+                  <TableCell>Pick-up Location</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Date From</TableCell>
+                  <TableCell>Date To</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {bookings.map((booking) => (
+                  <TableRow key={booking._id}>
+                    <TableCell>{booking.bookingId}</TableCell>
+                    <TableCell>{booking.customerId}</TableCell>
+                    <TableCell>{booking.vehicleId}</TableCell>
+                    <TableCell>{booking.pickUpLocation}</TableCell>
+                    <TableCell>{booking.status}</TableCell>
+                    <TableCell>{new Date(booking.dateFrom).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(booking.dateTo).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <IconButton onClick={() => handleEdit(booking._id)}><Edit /></IconButton>
+                      <IconButton onClick={() => deleteBooking(booking._id)}><Delete /></IconButton>
+                    </TableCell>
+                  </TableRow>
                 ))}
-            </Select>
-            <Select
-                name="pickupTime"
-                value={booking.pickupTime}
-                onChange={handleChange}
-                fullWidth
-                margin="normal"
-                sx={{ marginBottom: 3 }}
-            >
-                {availablePickupTimes.map(time => (
-                    <MenuItem key={time} value={time}>{time}</MenuItem>
-                ))}
-            </Select>
-            <TextField
-                label="Date"
-                type="date"
-                name="date"
-                value={booking.date ? new Date(booking.date).toISOString().split('T')[0] : ''}
-                onChange={handleChange}
-                margin="normal"
-                InputLabelProps={{ shrink: true }}
-                fullWidth
-                inputProps={{ min: currentDate }}
-            />
-            <Select
-                name="seatType"
-                value={booking.seatType}
-                onChange={handleChange}
-                fullWidth
-                margin="normal"
-                sx={{ marginBottom: 3 }}
-            >
-                <MenuItem value="">Select Seat Type</MenuItem>
-                <MenuItem value="luxury">Luxury</MenuItem>
-                <MenuItem value="vip">VIP</MenuItem>
-                <MenuItem value="regular">Regular</MenuItem>
-            </Select>
-            <Button
-                variant="contained"
-                color="primary"
-                onClick={handleUpdate}
-                sx={{ marginTop: 2 }}
-                disabled={loading}
-            >
-                {loading ? 'Updating...' : 'Update Booking'}
-            </Button>
-            {error && (
-                <Typography color="error" sx={{ marginTop: 2 }}>
-                    {error}
-                </Typography>
-            )}
-            {success && (
-                <Snackbar
-                    open={openSnackbar}
-                    autoHideDuration={6000}
-                    onClose={() => setOpenSnackbar(false)}
-                >
-                    <Alert severity="success" sx={{ width: '100%' }}>
-                        Booking updated successfully!
-                    </Alert>
-                </Snackbar>
-            )}
-        </Box>
-    );
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <Button variant="contained" onClick={handlePDF} sx={{ marginTop: 2 }}>
+            <Print /> Download Report
+          </Button>
+        </>
+      ) : (
+        <Typography variant="h6">Analysis View Coming Soon...</Typography>
+      )}
+      {error && (
+        <Snackbar open={true} autoHideDuration={6000} onClose={() => setError(null)}>
+          <Alert severity="error">{error}</Alert>
+        </Snackbar>
+      )}
+      {success && (
+        <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={() => setOpenSnackbar(false)}>
+          <Alert severity="success">Booking deleted successfully!</Alert>
+        </Snackbar>
+      )}
+    </Box>
+  );
 }
 
-export default UpdateBooking;
+export default BookingDetails;

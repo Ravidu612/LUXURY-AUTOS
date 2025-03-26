@@ -1,6 +1,5 @@
-/* eslint-disable no-unused-vars */
 import React from 'react';
-import { Box, Typography, Button, Card, CardContent, CardMedia, Grid } from '@mui/material';
+import { Box, Typography, Button, Card, CardContent, Grid } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
@@ -8,13 +7,13 @@ import Footer from '../Footer/Footer';
 const BookingConfirmation = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { bookingDetails } = location.state || {}; // Destructure the booking details passed via navigation
+  const { bookingDetails } = location.state || {}; 
 
   if (!bookingDetails) {
     return <Typography variant="h6">No booking details available.</Typography>;
   }
 
-  const { movie, showTimeId, date, seat, count, ticketId } = bookingDetails;
+  const { bookingId, customerId, vehicleId, pickUpLocation, status, dateFrom, dateTo } = bookingDetails;
 
   return (
     <div>
@@ -22,24 +21,8 @@ const BookingConfirmation = () => {
 
       <Box sx={{ padding: 3, backgroundColor: 'white', borderRadius: 1 }}>
         <Grid container spacing={3}>
-          {/* Movie Information Section */}
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardMedia
-                component="img"
-                alt={movie.name}
-                height="300"
-                image={movie.image || 'http://localhost:5173/src/Components/Images/3.png'}
-                title={movie.name}
-              />
-              <CardContent>
-                <Typography variant="h5">{movie.name}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
           {/* Booking Information Section */}
-          <Grid item xs={12} md={8}>
+          <Grid item xs={12}>
             <Typography variant="h4" gutterBottom>
               Booking Confirmation
             </Typography>
@@ -47,22 +30,25 @@ const BookingConfirmation = () => {
             <Card>
               <CardContent>
                 <Typography variant="h6">
-                  Ticket ID: <strong>{ticketId}</strong>
+                  Booking ID: <strong>{bookingId}</strong>
                 </Typography>
                 <Typography variant="h6">
-                  Movie: <strong>{movie.name}</strong>
+                  Customer ID: <strong>{customerId}</strong>
                 </Typography>
                 <Typography variant="h6">
-                  Show Time: <strong>{showTimeId}</strong>
+                  Vehicle ID: <strong>{vehicleId}</strong>
                 </Typography>
                 <Typography variant="h6">
-                  Date: <strong>{date}</strong>
+                  Pick-up Location: <strong>{pickUpLocation}</strong>
                 </Typography>
                 <Typography variant="h6">
-                  Seats: <strong>{seat}</strong>
+                  Status: <strong>{status}</strong>
                 </Typography>
                 <Typography variant="h6">
-                  Ticket Count: <strong>{count}</strong>
+                  Date From: <strong>{dateFrom}</strong>
+                </Typography>
+                <Typography variant="h6">
+                  Date To: <strong>{dateTo}</strong>
                 </Typography>
               </CardContent>
             </Card>

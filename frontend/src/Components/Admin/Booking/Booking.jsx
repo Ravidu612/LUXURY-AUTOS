@@ -1,17 +1,15 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, CircularProgress } from '@mui/material';
+import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AddBooking from './AddBooking';
 
-const URL = "http://localhost:4000/vehicle-booking";
+const URL = "http://localhost:4000/vehiclebookings";
 
 function Booking() {
     const [bookings, setBookings] = useState([]);
     const [showAddBookingForm, setShowAddBookingForm] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -19,28 +17,23 @@ function Booking() {
             try {
                 const response = await axios.get(URL);
                 setBookings(response.data);
-                setLoading(false);
             } catch (error) {
-                setError('Error fetching bookings.');
-                setLoading(false);
+                console.error("Error fetching bookings:", error);
             }
         };
         fetchBookings();
     }, []);
 
     const handleEdit = (id) => {
-        navigate(`/update-vehicle-booking/${id}`);
+        navigate(`/update-booking/${id}`);
     };
 
     const deleteBooking = async (id) => {
-        const confirmed = window.confirm('Are you sure you want to delete this booking?');
-        if (confirmed) {
-            try {
-                await axios.delete(`${URL}/${id}`);
-                setBookings(prev => prev.filter(booking => booking._id !== id));
-            } catch (error) {
-                setError('Error deleting booking.');
-            }
+        try {
+            await axios.delete(`${URL}/${id}`);
+            setBookings(prev => prev.filter(booking => booking._id !== id));
+        } catch (error) {
+            console.error("Error deleting booking:", error.response ? error.response.data : error.message);
         }
     };
 
@@ -53,62 +46,49 @@ function Booking() {
     };
 
     return (
-        <Box sx={{ padding: 3 }}>
+        <Box>
             {showAddBookingForm ? (
                 <AddBooking onBack={handleBack} />
             ) : (
                 <>
                     <Box sx={{ marginBottom: 2 }}>
                         <Button variant="contained" color="secondary" onClick={handleAddBooking}>
-                            Add Vehicle Booking
+                            Add Booking
                         </Button>
                     </Box>
-
-                    {loading ? (
-                        <CircularProgress />
-                    ) : error ? (
-                        <Typography color="error">{error}</Typography>
-                    ) : (
-                        <TableContainer component={Paper}>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Booking ID</TableCell>
-                                        <TableCell>Pickup Location</TableCell>
-                                        <TableCell>Vehicle Type</TableCell>
-                                        <TableCell>Vehicle Name</TableCell>
-                                        <TableCell>Price</TableCell>
-                                        <TableCell>Date From</TableCell>
-                                        <TableCell>Date To</TableCell>
-                                        <TableCell>User ID</TableCell>
-                                        <TableCell>Actions</TableCell>
+                    <TableContainer component={Paper}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Booking ID</TableCell>
+                                    <TableCell>Customer ID</TableCell>
+                                    <TableCell>Vehicle ID</TableCell>
+                                    <TableCell>Pick-up Location</TableCell>
+                                    <TableCell>Status</TableCell>
+                                    <TableCell>Date From</TableCell>
+                                    <TableCell>Date To</TableCell>
+                                    <TableCell>Actions</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {bookings.map(booking => (
+                                    <TableRow key={booking._id}>
+                                        <TableCell>{booking.bookingId}</TableCell>
+                                        <TableCell>{booking.customerId}</TableCell>
+                                        <TableCell>{booking.vehicleId}</TableCell>
+                                        <TableCell>{booking.pickUpLocation}</TableCell>
+                                        <TableCell>{booking.status}</TableCell>
+                                        <TableCell>{new Date(booking.dateFrom).toLocaleDateString()}</TableCell>
+                                        <TableCell>{new Date(booking.dateTo).toLocaleDateString()}</TableCell>
+                                        <TableCell>
+                                            <Button onClick={() => handleEdit(booking._id)}>Edit</Button>
+                                            <Button onClick={() => deleteBooking(booking._id)}>Delete</Button>
+                                        </TableCell>
                                     </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {bookings.map(booking => (
-                                        <TableRow key={booking._id}>
-                                            <TableCell>{booking.BookingId}</TableCell>
-                                            <TableCell>{booking.pickUpLocation}</TableCell>
-                                            <TableCell>{booking.vehicleType}</TableCell>
-                                            <TableCell>{booking.vehicleName}</TableCell>
-                                            <TableCell>{booking.price}</TableCell>
-                                            <TableCell>{new Date(booking.dateFrom).toLocaleDateString()}</TableCell>
-                                            <TableCell>{new Date(booking.dateTo).toLocaleDateString()}</TableCell>
-                                            <TableCell>{booking.userId}</TableCell>
-                                            <TableCell>
-                                                <Button variant="outlined" color="primary" onClick={() => handleEdit(booking._id)} sx={{ marginRight: 1 }}>
-                                                    Edit
-                                                </Button>
-                                                <Button variant="outlined" color="error" onClick={() => deleteBooking(booking._id)}>
-                                                    Delete
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    )}
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
                 </>
             )}
         </Box>
