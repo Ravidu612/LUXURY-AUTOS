@@ -25,9 +25,9 @@ const BookingDetails = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
   const [filterDateFrom, setFilterDateFrom] = useState("");
   const [filterDateTo, setFilterDateTo] = useState("");
-  const [openDialog, setOpenDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [currentBooking, setCurrentBooking] = useState({
     bookingId: "",
@@ -107,6 +107,7 @@ const BookingDetails = () => {
           InputLabelProps={{ shrink: true }}
           value={filterDateFrom}
           onChange={(e) => setFilterDateFrom(e.target.value)}
+          className="flex-1"
         />
         <TextField
           label="To Date"
@@ -114,10 +115,10 @@ const BookingDetails = () => {
           InputLabelProps={{ shrink: true }}
           value={filterDateTo}
           onChange={(e) => setFilterDateTo(e.target.value)}
+          className="flex-1"
         />
-      
       <Button variant="contained" color="primary" onClick={() => handleOpenDialog()}>Add Booking</Button>
-      </div><br></br>
+      </div>
       <TableContainer component={Paper} className="mt-4">
         <Table>
           <TableHead>
@@ -151,6 +152,33 @@ const BookingDetails = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Add/Edit Dialog */}
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>{currentBooking?.bookingId ? "Edit Booking" : "Add Booking"}</DialogTitle>
+        <DialogContent>
+          <TextField fullWidth margin="dense" name="customerId" label="Customer ID" value={currentBooking.customerId} onChange={handleChange} />
+          <TextField fullWidth margin="dense" name="vehicleId" label="Vehicle ID" value={currentBooking.vehicleId} onChange={handleChange} />
+          <TextField fullWidth margin="dense" name="pickUpLocation" label="Pick-up Location" value={currentBooking.pickUpLocation} onChange={handleChange} />
+          <TextField fullWidth margin="dense" name="status" label="Status" value={currentBooking.status} onChange={handleChange} />
+          <TextField fullWidth margin="dense" name="dateFrom" label="Date From" type="date" value={currentBooking.dateFrom} onChange={handleChange} />
+          <TextField fullWidth margin="dense" name="dateTo" label="Date To" type="date" value={currentBooking.dateTo} onChange={handleChange} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button color="primary" onClick={handleSaveBooking}>Save</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>Are you sure you want to delete this booking?</DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+          <Button color="secondary" onClick={handleDeleteBooking}>Delete</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
