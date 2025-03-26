@@ -15,17 +15,13 @@ import { useNavigate } from 'react-router-dom';
 const URL = "http://localhost:4000/vehicle-booking"; // Update the endpoint if necessary
 
 function AddBooking({ onBack }) {
-  const [pickupLocation, setPickupLocation] = useState('');
-  const [date, setDate] = useState('');
-  const [vehicleType, setVehicleType] = useState('');
-  const [vehicleName, setVehicleName] = useState('');
-  const [price, setPrice] = useState('');
+  const [bookingId, setBookingId] = useState('');
+  const [customerId, setCustomerId] = useState('');
+  const [vehicleId, setVehicleId] = useState('');
+  const [pickUpLocation, setPickUpLocation] = useState('');
+  const [status, setStatus] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  const [count, setCount] = useState('');
-  const [pickupTime, setPickupTime] = useState('');
-  const [seatType, setSeatType] = useState('');
-  const [userId, setUserId] = useState('');
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
@@ -36,17 +32,13 @@ function AddBooking({ onBack }) {
 
     try {
       const newBooking = {
-        pickUpLocation: pickupLocation,
-        date,
-        vehicleType,
-        vehicleName,
-        price,
+        BookingId: bookingId,
+        customerId,
+        vehicleId,
+        pickUpLocation,
+        status,
         dateFrom,
         dateTo,
-        count,
-        pickupTime,
-        seatType,
-        userId,
       };
 
       const response = await axios.post(URL, newBooking);
@@ -80,54 +72,57 @@ function AddBooking({ onBack }) {
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField
+                id="booking-id" // Added id
+                label="Booking ID"
+                value={bookingId}
+                onChange={(e) => setBookingId(e.target.value)}
+                fullWidth
+                required
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                id="customer-id" // Added id
+                label="Customer ID"
+                value={customerId}
+                onChange={(e) => setCustomerId(e.target.value)}
+                fullWidth
+                required
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                id="vehicle-id" // Added id
+                label="Vehicle ID"
+                value={vehicleId}
+                onChange={(e) => setVehicleId(e.target.value)}
+                fullWidth
+                required
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                id="pickup-location" // Added id
                 label="Pickup Location"
-                value={pickupLocation}
-                onChange={(e) => setPickupLocation(e.target.value)}
+                value={pickUpLocation}
+                onChange={(e) => setPickUpLocation(e.target.value)}
                 fullWidth
                 required
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
-                label="Date"
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Vehicle Type"
-                value={vehicleType}
-                onChange={(e) => setVehicleType(e.target.value)}
+                id="status" // Added id
+                label="Status"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
                 fullWidth
                 required
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
-                label="Vehicle Name"
-                value={vehicleName}
-                onChange={(e) => setVehicleName(e.target.value)}
-                fullWidth
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Price"
-                type="number"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                fullWidth
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
+                id="date-from" // Added id
                 label="Date From"
                 type="date"
                 value={dateFrom}
@@ -139,51 +134,13 @@ function AddBooking({ onBack }) {
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
+                id="date-to" // Added id
                 label="Date To"
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
                 fullWidth
                 InputLabelProps={{ shrink: true }}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Count"
-                type="number"
-                value={count}
-                onChange={(e) => setCount(e.target.value)}
-                fullWidth
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Pickup Time"
-                type="time"
-                value={pickupTime}
-                onChange={(e) => setPickupTime(e.target.value)}
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Seat Type"
-                value={seatType}
-                onChange={(e) => setSeatType(e.target.value)}
-                fullWidth
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="User ID"
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-                fullWidth
                 required
               />
             </Grid>
