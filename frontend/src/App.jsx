@@ -31,6 +31,7 @@ import Booking from './Components/Admin/Booking/Booking';
 import BookingPage from './Components/Home/Bookingpage';
 import { AuthProvider } from './Components/Auth/AuthContext';  // Import AuthProvider
 import VehiclePage from './Components/Home/Vehicle';
+import RentalDashboard from './Components/Admin/Rental/RentalList';
 
 
 
