@@ -1,129 +1,196 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardMedia, Typography, Button, Grid, TextField, Select, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Pagination, CircularProgress, IconButton } from "@mui/material";
-import { Add, Edit, Delete, Search } from "@mui/icons-material";
-import jsPDF from "jspdf";
-import axios from "axios";
+import React, { useState } from "react";
+import {
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Card,
+    CardContent,
+    Typography,
+    Grid,
+    Box,
+    Button,
+    TextField,
+    IconButton,
+} from "@mui/material";
+import { FaEdit, FaTrash } from "react-icons/fa";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+
+const defaultVehicleDetails = [
+    {
+        vehicleId: "V123",
+        image: "https://media.ed.edmunds-media.com/toyota/corolla-hatchback/2025/oem/2025_toyota_corolla-hatchback_4dr-hatchback_nightshade_fq_oem_1_1600.jpg",
+        name: "Toyota Corolla",
+        type: "Sedan",
+        fuel: "Petrol",
+        seats: 5,
+        transmission: "Automatic",
+        price: 20000,
+        status: "Available",
+    },
+    {
+        vehicleId: "V124",
+        image: "https://hips.hearstapps.com/hmg-prod/images/2025-tesla-model-s-1-672d42e172407.jpg?crop=0.465xw:0.466xh;0.285xw,0.361xh&resize=2048:*",
+        name: "Tesla Model S",
+        type: "Sedan",
+        fuel: "Electric",
+        seats: 5,
+        transmission: "Automatic",
+        price: 75000,
+        status: "Available",
+    },
+];
+
+const styles = StyleSheet.create({
+    page: { padding: 20 },
+    section: { marginBottom: 10 },
+});
+
+const VehiclePDF = ({ vehicle }) => (
+    <Document>
+        <Page style={styles.page}>
+            <View style={styles.section}>
+                <Text>Vehicle Name: {vehicle.name}</Text>
+                <Text>Type: {vehicle.type}</Text>
+                <Text>Fuel: {vehicle.fuel}</Text>
+                <Text>Seats: {vehicle.seats}</Text>
+                <Text>Transmission: {vehicle.transmission}</Text>
+                <Text>Price: ${vehicle.price}</Text>
+                <Text>Status: {vehicle.status}</Text>
+            </View>
+        </Page>
+    </Document>
+);
 
 const VehicleDetails = () => {
-    const [vehicles, setVehicles] = useState([]);
-    const [filteredVehicles, setFilteredVehicles] = useState([]);
-    const [search, setSearch] = useState("");
-    const [filterType, setFilterType] = useState("");
-    const [filterTransmission, setFilterTransmission] = useState("");
-    const [filterFuel, setFilterFuel] = useState("");
+    const [vehicles, setVehicles] = useState(defaultVehicleDetails);
+    const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
     const [selectedVehicle, setSelectedVehicle] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [newVehicle, setNewVehicle] = useState({ name: "", type: "", fuel: "", seats: "", transmission: "", price: "", image: "" });
-    const [openForm, setOpenForm] = useState(false);
 
-    useEffect(() => {
-        const fetchVehicles = async () => {
-            try {
-                const response = await axios.get('http://localhost:4000/vehicles');
-                setVehicles(response.data);
-                setFilteredVehicles(response.data);
-            } catch (error) {
-                console.error("Error fetching vehicles:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchVehicles();
-    }, []);
-
-    const handleSearchChange = (e) => {
-        setSearch(e.target.value);
-        filterVehicles(e.target.value, filterType, filterTransmission, filterFuel);
+    const handleOpenUpdateDialog = (vehicle) => {
+        setSelectedVehicle(vehicle);
+        setUpdateDialogOpen(true);
     };
 
-    const handleFilterChange = (setter) => (e) => {
-        setter(e.target.value);
-        filterVehicles(search, filterType, filterTransmission, filterFuel);
+    const handleUpdateChange = (e) => {
+        const { name, value } = e.target;
+        setSelectedVehicle((prev) => ({ ...prev, [name]: value }));
     };
 
-    const filterVehicles = (search, type, transmission, fuel) => {
-        let filtered = vehicles.filter(vehicle =>
-            vehicle.name.toLowerCase().includes(search.toLowerCase()) &&
-            (type ? vehicle.type === type : true) &&
-            (transmission ? vehicle.transmission === transmission : true) &&
-            (fuel ? vehicle.fuel === fuel : true)
+    const handleUpdateSubmit = () => {
+        setVehicles((prevVehicles) =>
+            prevVehicles.map((vehicle) =>
+                vehicle.vehicleId === selectedVehicle.vehicleId ? selectedVehicle : vehicle
+            )
         );
-        setFilteredVehicles(filtered);
+        setUpdateDialogOpen(false);
     };
 
-    const handleAddVehicle = async () => {
-        // Validate form fields
-        if (!newVehicle.name || !newVehicle.type || !newVehicle.fuel || !newVehicle.seats || !newVehicle.transmission || !newVehicle.price || !newVehicle.image) {
-            alert("Please fill all fields!");
+    const handleAddVehicle = () => {
+        if (vehicles.some((v) => v.vehicleId === newVehicle.vehicleId)) {
+            alert("Vehicle ID already exists!");
             return;
         }
 
-        try {
-            await axios.post('http://localhost:4000/vehicles', newVehicle);
-            setOpenForm(false);
-            setNewVehicle({ name: "", type: "", fuel: "", seats: "", transmission: "", price: "", image: "" });
-            const response = await axios.get('http://localhost:4000/vehicles');
-            setVehicles(response.data);
-            setFilteredVehicles(response.data);
-        } catch (error) {
-            console.error("Error adding vehicle:", error);
-            alert("There was an error adding the vehicle!");
-        }
+        setVehicles((prevVehicles) => [...prevVehicles, newVehicle]);
+
+        setNewVehicle({
+            vehicleId: "",
+            image: "",
+            name: "",
+            type: "",
+            fuel: "",
+            seats: 1,
+            transmission: "",
+            price: 0,
+            status: "",
+        });
     };
 
-    const handleDownloadPDF = (vehicle) => {
-        const doc = new jsPDF();
-        doc.text(`Vehicle Details`, 10, 10);
-        doc.text(`Name: ${vehicle.name}`, 10, 20);
-        doc.text(`Type: ${vehicle.type}`, 10, 30);
-        doc.text(`Fuel: ${vehicle.fuel}`, 10, 40);
-        doc.text(`Seats: ${vehicle.seats}`, 10, 50);
-        doc.text(`Transmission: ${vehicle.transmission}`, 10, 60);
-        doc.text(`Price: $${vehicle.price}`, 10, 70);
-        doc.text(`Status: ${vehicle.status}`, 10, 80);
-        doc.save(`${vehicle.name}_details.pdf`);
+    const handleDeleteVehicle = (vehicleId) => {
+        setVehicles(vehicles.filter((vehicle) => vehicle.vehicleId !== vehicleId));
+    };
+
+    const handleSubmit = () => {
+        handleAddVehicle();
+        setDialogOpen(false);
     };
 
     return (
-        <div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}>
-                <TextField label="Search" variant="outlined" size="small" onChange={handleSearchChange} />
-                <Button variant="contained" color="primary" startIcon={<Add />} onClick={() => setOpenForm(true)}>Add Vehicle</Button>
-            </div>
+        <Box sx={{ padding: 3 }}>
+            <Typography variant="h4" align="center" gutterBottom>
+                Available Vehicles
+            </Typography>
+            <Box sx={{ display: "flex", justifyContent: "center", marginBottom: 2 }}>
+                <Button variant="contained" onClick={() => setDialogOpen(true)}>
+                    Add Vehicle
+                </Button>
+            </Box>
 
-            <Grid container spacing={2}>
-                {loading ? <CircularProgress /> : filteredVehicles.length > 0 ? filteredVehicles.map(vehicle => (
+            <Grid container spacing={3} justifyContent="center">
+                {vehicles.map((vehicle) => (
                     <Grid item xs={12} sm={6} md={4} key={vehicle.vehicleId}>
-                        <Card>
-                            <CardMedia component="img" height="140" image={vehicle.image} alt={vehicle.name} />
+                        <Card sx={{ maxWidth: 345 }}>
+                            <img
+                                src={vehicle.image}
+                                alt={vehicle.name}
+                                style={{ width: "100%", height: 200, objectFit: "cover" }}
+                            />
                             <CardContent>
                                 <Typography variant="h6">{vehicle.name}</Typography>
-                                <Typography>{vehicle.type} - {vehicle.transmission}</Typography>
-                                <Typography>Status: {vehicle.status}</Typography>
-                                <Button onClick={() => handleDownloadPDF(vehicle)} variant="contained" size="small">Download PDF</Button>
+                                <Typography color="textSecondary">{vehicle.type}</Typography>
+                                <Typography variant="body2">Fuel: {vehicle.fuel}</Typography>
+                                <Typography variant="body2">Seats: {vehicle.seats}</Typography>
+                                <Typography variant="body2">Transmission: {vehicle.transmission}</Typography>
+                                <Typography variant="body2">Price: ${vehicle.price}</Typography>
+                                <Typography variant="body2">Status: {vehicle.status}</Typography>
+
+                                <Box sx={{ display: "flex", justifyContent: "space-between", marginTop: 2 }}>
+                                    <PDFDownloadLink
+                                        document={<VehiclePDF vehicle={vehicle} />}
+                                        fileName={`${vehicle.name}.pdf`}
+                                    >
+                                        {({ loading }) => (loading ? "Loading PDF..." : "Download PDF")}
+                                    </PDFDownloadLink>
+                                    <Box>
+                                        <IconButton onClick={() => handleOpenUpdateDialog(vehicle)}>
+                                            <FaEdit />
+                                        </IconButton>
+                                        <IconButton onClick={() => handleDeleteVehicle(vehicle.vehicleId)}>
+                                            <FaTrash />
+                                        </IconButton>
+                                    </Box>
+                                </Box>
                             </CardContent>
                         </Card>
                     </Grid>
-                )) : <Typography>No Vehicles Found</Typography>}
+                ))}
             </Grid>
 
-            <Dialog open={openForm} onClose={() => setOpenForm(false)}>
-                <DialogTitle>Add Vehicle</DialogTitle>
+            <Dialog open={updateDialogOpen} onClose={() => setUpdateDialogOpen(false)}>
+                <DialogTitle>Update Vehicle Details</DialogTitle>
                 <DialogContent>
-                    <TextField label="Name" fullWidth onChange={(e) => setNewVehicle({ ...newVehicle, name: e.target.value })} />
-                    <TextField label="Type" fullWidth onChange={(e) => setNewVehicle({ ...newVehicle, type: e.target.value })} />
-                    <TextField label="Fuel" fullWidth onChange={(e) => setNewVehicle({ ...newVehicle, fuel: e.target.value })} />
-                    <TextField label="Seats" fullWidth type="number" onChange={(e) => setNewVehicle({ ...newVehicle, seats: e.target.value })} />
-                    <TextField label="Transmission" fullWidth onChange={(e) => setNewVehicle({ ...newVehicle, transmission: e.target.value })} />
-                    <TextField label="Price" fullWidth type="number" onChange={(e) => setNewVehicle({ ...newVehicle, price: e.target.value })} />
-                    <TextField label="Image URL" fullWidth onChange={(e) => setNewVehicle({ ...newVehicle, image: e.target.value })} />
+                    {selectedVehicle && (
+                        ["name", "image", "type", "fuel", "seats", "transmission", "price", "status"].map((field) => (
+                            <TextField
+                                key={field}
+                                fullWidth
+                                label={field.charAt(0).toUpperCase() + field.slice(1)}
+                                name={field}
+                                value={selectedVehicle[field] || ""}
+                                onChange={handleUpdateChange}
+                                margin="dense"
+                            />
+                        ))
+                    )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenForm(false)}>Cancel</Button>
-                    <Button onClick={handleAddVehicle} variant="contained" color="primary">Add</Button>
+                    <Button onClick={() => setUpdateDialogOpen(false)}>Cancel</Button>
+                    <Button onClick={handleUpdateSubmit} variant="contained">Update</Button>
                 </DialogActions>
             </Dialog>
-        </div>
+        </Box>
     );
 };
 

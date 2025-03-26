@@ -5,7 +5,7 @@ import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, Ta
 import { useNavigate } from 'react-router-dom';
 import AddBooking from './AddBooking';
 
-const URL = "http://localhost:4000/vehicle-bookings";
+const URL = "http://localhost:4000/vehicle-booking";
 
 function Booking() {
     const [bookings, setBookings] = useState([]);
@@ -88,7 +88,7 @@ function Booking() {
                                     {bookings.map(booking => (
                                         <TableRow key={booking._id}>
                                             <TableCell>{booking.BookingId}</TableCell>
-                                            <TableCell>{booking.pickupLocation}</TableCell>
+                                            <TableCell>{booking.pickUpLocation}</TableCell>
                                             <TableCell>{booking.vehicleType}</TableCell>
                                             <TableCell>{booking.vehicleName}</TableCell>
                                             <TableCell>{booking.price}</TableCell>

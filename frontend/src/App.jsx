@@ -3,9 +3,10 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 
 import Home from './Components/Home/Home';
-import BookingPage from './Components/Home/Bookingpage';
+//import Home from './Components/Home/OUR VEHICLES';
 import Login from './Components/Login/Login';
 import Vehicle from './Components/Home/Vehicle';
+import vehicle from './Components/Home/Bookingpage';
 import AboutUs from './Components/Home/AboutUs';
 import Contact from './Components/Home/ContactUs';
 import Register from './Components/Login/Register';
@@ -23,12 +24,13 @@ import Userlist from './Components/Admin/Users/Userlist';
 import VehicleDetails from './Components/Admin/Vehicle/VehicleDetails';
 import AddVehicle from './Components/Admin/Vehicle/AddVehicle';
 import UpdateVehicle from './Components/Admin/Vehicle/UpdateVehicle';
-import BookingConfirmation from './Components/Home/BookingConfirmation';
 import BookingDetails from './Components/Admin/Booking/BookingDetails';
 import AddBooking from './Components/Admin/Booking/AddBooking';
 import UpdateBooking from './Components/Admin/Booking/UpdateBooking';
 import Booking from './Components/Admin/Booking/Booking';
+import BookingPage from './Components/Home/Bookingpage';
 import { AuthProvider } from './Components/Auth/AuthContext';  // Import AuthProvider
+import VehiclePage from './Components/Home/Vehicle';
 
 
 
@@ -48,15 +50,14 @@ function App() {
           <Route path='/contact' element={<Contact />} />
           <Route path='/signup' element={<Register />} />
           <Route path='/userprofile' element={<UserProfile />} />
-          <Route path="/booking-confirmation" element={<BookingConfirmation />} />
-          <Route path="/booking-confirmation" element={<BookingConfirmation />} />
-          <Route path="/booking" element={<BookingPage />} />
-
+          <Route path="/booknow" element={<BookingPage />} />
+          <Route path="/ourvehicles" element={<VehiclePage />} />
 
 
           {/* Login Page */}
           <Route path="/login" element={<Login />} />
           <Route path='/Vehicle' element={<Vehicle />} />
+          <Route path="/book" element={<BookingPage />} />
           <Route path='/About' element={<AboutUs />} />
           <Route path='/Contact' element={<Contact />} />
           <Route path='/signup' element={<Register />} />

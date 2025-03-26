@@ -3,34 +3,27 @@ import axios from 'axios';
 import { Box, Select, MenuItem, TextField, Button, Typography, Snackbar, Alert, CircularProgress } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 
-const URL = "http://localhost:4000/vehicle-bookings";
+const URL = "http://localhost:4000/vehicle-booking";
 
 function UpdateBooking() {
     const { id } = useParams();
     const [booking, setBooking] = useState({
         BookingId: '',
         count: '',
-        vehicleId: '',
+        vehicleType: '',
         pickupTime: '',
         date: '',
         seatType: '',
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(false);  // New state for success message
-    const [openSnackbar, setOpenSnackbar] = useState(false);  // Snackbar for showing success/error messages
+    const [success, setSuccess] = useState(false);
+    const [openSnackbar, setOpenSnackbar] = useState(false);
     const navigate = useNavigate();
 
-    // Available vehicle types
     const availableVehicles = ["Sedan", "SUV", "Truck", "Van"];
-
-    // Available pickup times
     const availablePickupTimes = ["09:00", "12:00", "15:00", "18:00", "21:00"];
-
-    // Get current date and time
-    const now = new Date();
-    const currentTime = now.toTimeString().slice(0, 5); // Current time in HH:mm format
-    const currentDate = now.toISOString().split("T")[0]; // Current date in YYYY-MM-DD format
+    const currentDate = new Date().toISOString().split("T")[0];
 
     useEffect(() => {
         const fetchBooking = async () => {
@@ -39,7 +32,6 @@ function UpdateBooking() {
                 setBooking(response.data);
                 setLoading(false);
             } catch (error) {
-                console.error("Error fetching booking:", error);
                 setError(error.response ? error.response.data.message : 'An error occurred');
                 setLoading(false);
             }
@@ -54,22 +46,22 @@ function UpdateBooking() {
     };
 
     const handleUpdate = async () => {
-        if (!booking.count || !booking.vehicleId || !booking.pickupTime || !booking.seatType || !booking.date) {
+        if (!booking.count || !booking.vehicleType || !booking.pickupTime || !booking.seatType || !booking.date) {
             setError('All fields are required!');
             return;
         }
 
         try {
-            setLoading(true);  // Start loading when the update request is sent
+            setLoading(true);
             await axios.put(`${URL}/${id}`, booking);
             setSuccess(true);
             setOpenSnackbar(true);
             setTimeout(() => {
-                navigate('/admindashboard/vehicle-booking'); // Redirect after success
+                navigate('/admindashboard/vehicle-booking');
             }, 2000);
         } catch (error) {
             setError(error.response ? error.response.data.message : 'An error occurred');
-            setLoading(false);  // Stop loading in case of error
+            setLoading(false);
         }
     };
 
@@ -87,7 +79,7 @@ function UpdateBooking() {
                 onChange={handleChange}
                 fullWidth
                 margin="normal"
-                disabled // Booking ID shouldn't be editable
+                disabled
             />
             <TextField
                 label="Count"
@@ -96,13 +88,12 @@ function UpdateBooking() {
                 onChange={handleChange}
                 fullWidth
                 margin="normal"
-                type="number" // Set to number type to restrict input
-                inputProps={{ min: 1 }} // Ensure minimum value
+                type="number"
+                inputProps={{ min: 1 }}
             />
             <Select
-                label="Vehicle Type"
-                name="vehicleId"
-                value={booking.vehicleId}
+                name="vehicleType"
+                value={booking.vehicleType}
                 onChange={handleChange}
                 fullWidth
                 margin="normal"
@@ -112,9 +103,7 @@ function UpdateBooking() {
                     <MenuItem key={vehicle} value={vehicle}>{vehicle}</MenuItem>
                 ))}
             </Select>
-
             <Select
-                label="Pickup Time"
                 name="pickupTime"
                 value={booking.pickupTime}
                 onChange={handleChange}
@@ -126,26 +115,18 @@ function UpdateBooking() {
                     <MenuItem key={time} value={time}>{time}</MenuItem>
                 ))}
             </Select>
-
             <TextField
                 label="Date"
-                variant="outlined"
                 type="date"
                 name="date"
-                value={booking.date ? new Date(booking.date).toISOString().split('T')[0] : ''} // Format for the date input
+                value={booking.date ? new Date(booking.date).toISOString().split('T')[0] : ''}
                 onChange={handleChange}
                 margin="normal"
                 InputLabelProps={{ shrink: true }}
                 fullWidth
-                required
-                sx={{ marginBottom: 3 }}
-                inputProps={{
-                    min: currentDate // Set minimum date to today
-                }}
+                inputProps={{ min: currentDate }}
             />
-
             <Select
-                label="Seat Type"
                 name="seatType"
                 value={booking.seatType}
                 onChange={handleChange}
@@ -158,23 +139,20 @@ function UpdateBooking() {
                 <MenuItem value="vip">VIP</MenuItem>
                 <MenuItem value="regular">Regular</MenuItem>
             </Select>
-
             <Button
                 variant="contained"
                 color="primary"
                 onClick={handleUpdate}
                 sx={{ marginTop: 2 }}
-                disabled={loading}  // Disable the button while loading
+                disabled={loading}
             >
                 {loading ? 'Updating...' : 'Update Booking'}
             </Button>
-
             {error && (
                 <Typography color="error" sx={{ marginTop: 2 }}>
                     {error}
                 </Typography>
             )}
-
             {success && (
                 <Snackbar
                     open={openSnackbar}

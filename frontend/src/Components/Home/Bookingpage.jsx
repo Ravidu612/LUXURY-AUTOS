@@ -1,154 +1,253 @@
-import React, { useState } from 'react';
-import { Box, Button, TextField, Typography, MenuItem, Grid } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { DatePicker, TimePicker } from '@mui/x-date-pickers';
+/* eslint-disable no-unused-vars */
+import React, { useEffect, useState } from 'react';
+import { Box, Typography, Button, TextField, MenuItem } from '@mui/material';
+import Navbar from '../Navbar/Navbar';
+import Footer from '../Footer/Footer';
+import carImage from '../Images/book.png'; // Corrected the import path for the image
 
-
-const BookingPage = () => {
+function BookingPage() {
+  const [fadeIn, setFadeIn] = useState(false);
+  const [vehicleType, setVehicleType] = useState('');
+  const [pricePerDay, setPricePerDay] = useState(0);
   const [pickupLocation, setPickupLocation] = useState('');
-  const [dropoffLocation, setDropoffLocation] = useState('');
-  const [fromDate, setFromDate] = useState(null);
-  const [fromTime, setFromTime] = useState(null);
-  const [toDate, setToDate] = useState(null);
-  const [toTime, setToTime] = useState(null);
+  const [dropOffLocation, setDropOffLocation] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [totalPrice, setTotalPrice] = useState(0);
 
-  const locations = [
-    "Arugam Bay town limits only - Arugam Bay town limits only, Sri Lanka",
-    "Colombo City - Colombo City, Sri Lanka",
-    "Kandy City - Kandy City, Sri Lanka",
+  // Vehicle types and their prices
+  const vehicleOptions = [
+    { type: 'Car', price: 50 },
+    { type: 'Van', price: 80 },
+    { type: 'Bus', price: 120 },
+    { type: 'Bike', price: 30 },
   ];
 
-  const handleSearch = () => {
-    console.log({
-      pickupLocation,
-      dropoffLocation,
-      fromDate,
-      fromTime,
-      toDate,
-      toTime,
-    });
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFadeIn(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Handle vehicle type change
+  const handleVehicleTypeChange = (event) => {
+    const selectedType = event.target.value;
+    setVehicleType(selectedType);
+
+    // Find the price for the selected vehicle type
+    const selectedVehicle = vehicleOptions.find((vehicle) => vehicle.type === selectedType);
+    setPricePerDay(selectedVehicle ? selectedVehicle.price : 0);
+  };
+
+  // Calculate total price based on renting days
+  const calculateTotalPrice = () => {
+    if (fromDate && toDate) {
+      const start = new Date(fromDate);
+      const end = new Date(toDate);
+      const rentingDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1; // Include the start day
+      if (rentingDays > 0) {
+        setTotalPrice(rentingDays * pricePerDay);
+      } else {
+        setTotalPrice(0);
+      }
+    } else {
+      setTotalPrice(0);
+    }
+  };
+
+  useEffect(() => {
+    calculateTotalPrice();
+  }, [fromDate, toDate, pricePerDay]);
+
+  // Handle booking receipt generation
+  const handleBooking = () => {
+    if (!pickupLocation || !dropOffLocation || !vehicleType || !fromDate || !toDate) {
+      alert('Please fill in all fields before booking.');
+      return;
+    }
+
+    const receiptContent = `
+      Booking Receipt
+      -----------------
+      Pickup Location: ${pickupLocation}
+      Drop off Location: ${dropOffLocation}
+      Vehicle Type: ${vehicleType}
+      Price Per Day: $${pricePerDay}
+      Booking Dates: ${fromDate} to ${toDate}
+      Total Price: $${totalPrice}
+    `;
+    const blob = new Blob([receiptContent], { type: 'text/plain' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'BookingReceipt.txt';
+    link.click();
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
+    <div
+      style={{
+        minHeight: '100vh',
+        margin: 0,
+        overflow: 'hidden',
+        opacity: fadeIn ? 1 : 0,
+        transition: 'opacity 1.5s ease-out',
+        background: '#F5F5F5',
+      }}
+    >
+      {/* Navbar */}
+      <Navbar />
+
+      {/* Main Content */}
       <Box
         sx={{
-          maxWidth: 400,
-          mx: 'auto',
-          my: 5,
-          p: 3,
-          border: '1px solid #ddd',
-          borderRadius: '8px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          backgroundColor: '#fff',
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: { xs: '20px', md: '60px 100px' },
+          background: '#fff',
+          minHeight: '80vh',
         }}
       >
-        <Typography variant="h5" sx={{ color: '#f97316', mb: 2, fontWeight: 700 }}>
-          Book Now
-        </Typography>
-
-        {/* Pickup Location */}
-        <TextField
-          select
-          label="Pickup Location"
-          value={pickupLocation}
-          onChange={(e) => setPickupLocation(e.target.value)}
-          fullWidth
-          margin="normal"
+        {/* Left Side: Booking Form */}
+        <Box
+          sx={{
+            flex: 1,
+            backgroundColor: '#FFB400',
+            padding: '30px',
+            borderRadius: '10px',
+            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
+            color: '#fff',
+          }}
         >
-          {locations.map((loc) => (
-            <MenuItem key={loc} value={loc}>
-              {loc}
-            </MenuItem>
-          ))}
-        </TextField>
-
-        {/* Drop off Location */}
-        <TextField
-          select
-          label="Drop off Location"
-          value={dropoffLocation}
-          onChange={(e) => setDropoffLocation(e.target.value)}
-          fullWidth
-          margin="normal"
-        >
-          {locations.map((loc) => (
-            <MenuItem key={loc} value={loc}>
-              {loc}
-            </MenuItem>
-          ))}
-        </TextField>
-
-        {/* From and To Dates */}
-        <Box mt={2}>
-          <Typography variant="body1" sx={{ fontWeight: 500, mb: 1 }}>
-            From
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 'bold',
+              marginBottom: '20px',
+              textAlign: 'center',
+            }}
+          >
+            Book Now
           </Typography>
-          <Grid container spacing={1}>
-            <Grid item xs={6}>
-              <DatePicker
-                label="Date"
-                value={fromDate}
-                onChange={(newValue) => setFromDate(newValue)}
-                renderInput={(params) => <TextField {...params} fullWidth />}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TimePicker
-                label="Time"
-                value={fromTime}
-                onChange={(newValue) => setFromTime(newValue)}
-                renderInput={(params) => <TextField {...params} fullWidth />}
-              />
-            </Grid>
-          </Grid>
-        </Box>
-
-        <Box mt={2}>
-          <Typography variant="body1" sx={{ fontWeight: 500, mb: 1 }}>
-            To
-          </Typography>
-          <Grid container spacing={1}>
-            <Grid item xs={6}>
-              <DatePicker
-                label="Date"
-                value={toDate}
-                onChange={(newValue) => setToDate(newValue)}
-                renderInput={(params) => <TextField {...params} fullWidth />}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TimePicker
-                label="Time"
-                value={toTime}
-                onChange={(newValue) => setToTime(newValue)}
-                renderInput={(params) => <TextField {...params} fullWidth />}
-              />
-            </Grid>
-          </Grid>
-        </Box>
-
-        {/* Search Button */}
-        <Box mt={4}>
+          <TextField
+            label="Pickup Location"
+            fullWidth
+            margin="normal"
+            value={pickupLocation}
+            onChange={(e) => setPickupLocation(e.target.value)}
+            sx={{ backgroundColor: '#fff', borderRadius: '5px' }}
+          />
+          <TextField
+            label="Drop off Location"
+            fullWidth
+            margin="normal"
+            value={dropOffLocation}
+            onChange={(e) => setDropOffLocation(e.target.value)}
+            sx={{ backgroundColor: '#fff', borderRadius: '5px' }}
+          />
+          <TextField
+            label="Vehicle Type"
+            select
+            fullWidth
+            value={vehicleType}
+            onChange={handleVehicleTypeChange}
+            margin="normal"
+            sx={{ backgroundColor: '#fff', borderRadius: '5px' }}
+          >
+            {vehicleOptions.map((vehicle) => (
+              <MenuItem key={vehicle.type} value={vehicle.type}>
+                {vehicle.type}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            label="Price Per Day"
+            value={`$${pricePerDay}`}
+            fullWidth
+            margin="normal"
+            InputProps={{ readOnly: true }}
+            sx={{ backgroundColor: '#fff', borderRadius: '5px' }}
+          />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+            <TextField
+              label="From"
+              type="date"
+              fullWidth
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              inputProps={{ min: new Date().toISOString().split('T')[0] }}
+              sx={{ backgroundColor: '#fff', borderRadius: '5px', marginRight: '10px' }}
+            />
+            <TextField
+              label="To"
+              type="date"
+              fullWidth
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              inputProps={{ min: new Date().toISOString().split('T')[0] }}
+              sx={{ backgroundColor: '#fff', borderRadius: '5px' }}
+            />
+          </Box>
+          <TextField
+            label="Total Price"
+            value={`$${totalPrice}`}
+            fullWidth
+            margin="normal"
+            InputProps={{ readOnly: true }}
+            sx={{ backgroundColor: '#fff', borderRadius: '5px' }}
+          />
           <Button
             variant="contained"
             fullWidth
             sx={{
-              backgroundColor: '#059669',
-              '&:hover': { backgroundColor: '#047857' },
+              backgroundColor: '#28a745',
               color: '#fff',
-              py: 1.5,
-              fontWeight: 600,
+              marginTop: '20px',
+              padding: '10px',
+              borderRadius: '5px',
+              '&:hover': { backgroundColor: '#218838' },
             }}
-            onClick={handleSearch}
+            onClick={() => {
+              handleBooking();
+              alert('Your booking is successfully completed!');
+            }}
           >
-            Search
+            Book Now
           </Button>
         </Box>
+
+        {/* Right Side: Image */}
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '20px',
+          }}
+        >
+          <img
+            src={carImage}
+            alt="Luxury Car"
+            style={{
+              width: '100%',
+              maxWidth: '600px',
+              objectFit: 'contain',
+              borderRadius: '15px',
+              boxShadow: '0px 8px 20px rgba(0, 0, 0, 0.1)',
+            }}
+          />
+        </Box>
       </Box>
-    </LocalizationProvider>
+
+      {/* Footer */}
+      <Footer />
+    </div>
   );
-};
+}
 
 export default BookingPage;

@@ -1,4 +1,5 @@
-const VehicleBooking = require('../Model/BookingModel');  // Adjust according to your model path
+const VehicleBooking = require('../Model/BookingModel'); // Adjust according to your model path
+const mongoose = require('mongoose');
 
 // Generate Vehicle Booking ID with leading zeros
 const generateBookingId = async () => {
@@ -11,13 +12,13 @@ const generateBookingId = async () => {
 // Create a new Vehicle Booking
 exports.createBooking = async (req, res) => {
     try {
-        const { pickUpLocation, date, vehicleType, vehicleName, price, dateFrom, dateTo } = req.body;
-        
+        const { pickUpLocation, date, vehicleType, vehicleName, price, dateFrom, dateTo, count, pickupTime, seatType, userId } = req.body;
+
         // Generate new Booking ID
         const BookingId = await generateBookingId();
-        
+
         // Check if all required fields are present
-        if (!pickUpLocation || !date || !vehicleType || !vehicleName || !price || !dateFrom || !dateTo) {
+        if (!pickUpLocation || !date || !vehicleType || !vehicleName || !price || !dateFrom || !dateTo || !count || !pickupTime || !seatType || !userId) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
@@ -30,6 +31,10 @@ exports.createBooking = async (req, res) => {
             price,
             dateFrom,
             dateTo,
+            count,
+            pickupTime,
+            seatType,
+            userId,
         });
         await newBooking.save();
 
@@ -67,12 +72,12 @@ exports.getBookingById = async (req, res) => {
 // Update a Vehicle Booking item by ID
 exports.updateBooking = async (req, res) => {
     const id = req.params.id;
-    const { pickUpLocation, date, vehicleType, vehicleName, price, dateFrom, dateTo } = req.body;
+    const { pickUpLocation, date, vehicleType, vehicleName, price, dateFrom, dateTo, count, pickupTime, seatType, userId } = req.body;
 
     try {
         const updatedBooking = await VehicleBooking.findByIdAndUpdate(
             id,
-            { pickUpLocation, date, vehicleType, vehicleName, price, dateFrom, dateTo },
+            { pickUpLocation, date, vehicleType, vehicleName, price, dateFrom, dateTo, count, pickupTime, seatType, userId },
             { new: true, runValidators: true } // Return the updated Booking, validate inputs
         );
 
@@ -87,8 +92,6 @@ exports.updateBooking = async (req, res) => {
 };
 
 // Delete a Vehicle Booking item by ID
-const mongoose = require('mongoose');
-
 exports.deleteBooking = async (req, res) => {
     const id = req.params.id;
 

@@ -1,12 +1,14 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import Navbar from '../Navbar/Navbar';
-import carImage from '../Images/car.png'; // Adjust the path according to your project structure
-import Footer from "../Footer/Footer";
+import carImage from '../Images/car.png'; // Adjust the path accordingly
+import Footer from '../Footer/Footer';
 
 function Home() {
   const [fadeIn, setFadeIn] = useState(false);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -16,34 +18,45 @@ function Home() {
   }, []);
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      margin: 0,
-      overflow: 'hidden',
-      opacity: fadeIn ? 1 : 0,
-      transition: 'opacity 2s ease-out',
-      background: '#ffffff'
-    }}>
+    <div style={{ minHeight: '100vh', margin: 0, overflow: 'hidden', opacity: fadeIn ? 1 : 0, transition: 'opacity 2s ease-out', background: '#ffffff' }}>
+      
+      {/* Navbar */}
       <Navbar />
 
+      {/* Main Content */}
       <Box
         sx={{
           display: 'flex',
+          flexDirection: 'row',
           alignItems: 'center',
-          justifyContent: 'space-between',
+          justifyContent: 'center',
           padding: '50px 80px',
           background: '#fff',
           flexWrap: 'wrap',
+          minHeight: '80vh',
         }}
       >
-        {/* Left Side Text */}
-        <Box sx={{ flex: '1 1 50%', paddingRight: '40px' }}>
+        {/* Left Side: Image */}
+        <Box sx={{ flex: '1 1 50%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <img
+            src={carImage}
+            alt="Luxury Car"
+            style={{
+              width: '100%',
+              maxWidth: '50%', // Ensures the image takes up half the page width
+              objectFit: 'contain',
+              borderRadius: '10px',
+            }}
+          />
+        </Box>
+
+        {/* Right Side: Description */}
+        <Box sx={{ flex: '1 1 50%', paddingLeft: '40px' }}>
           <Typography variant="h3" sx={{ fontWeight: 'bold', fontSize: '2.5rem', lineHeight: 1.2 }}>
-            <span style={{ color: '#FFB400' }}>Rent a car</span> and find great deals with us
+            <span style={{ color: '#FFB400' }}>Luxury Autos</span> for Premium Comfort
           </Typography>
           <Typography sx={{ color: '#5C5C5C', margin: '20px 0', fontSize: '0.95rem' }}>
-            Choose from a collection of brand new cars, low prices are part of our everyday offer.
-          </Typography>
+          Unlock unforgettable memories on the road          </Typography>
           <Button
             variant="contained"
             sx={{
@@ -55,31 +68,14 @@ function Home() {
               boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
               '&:hover': { backgroundColor: '#e5a200' },
             }}
+            onClick={() => navigate('/vehicles')} // Navigate to VehiclePage
           >
-            Book online now!
+            OUR VEHICLES
           </Button>
-        </Box>
-
-        {/* Right Side Image */}
-        <Box
-          sx={{
-            flex: '1 1 50%',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            background: 'linear-gradient(to bottom, #0C84FF, #0073E6)',
-            borderRadius: '20px',
-            padding: '20px',
-          }}
-        >
-          <img
-            src={carImage}
-            alt="Car"
-            style={{ width: '100%', maxWidth: '450px', objectFit: 'contain' }}
-          />
         </Box>
       </Box>
 
+      {/* Footer */}
       <Footer />
     </div>
   );

@@ -37,7 +37,7 @@ export default class Dashboard extends Component {
   // Fetch the vehicle count from the server
   fetchVehicleCount = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/api/vehicles'); // Ensure this points to your vehicles endpoint
+      const response = await axios.get('http://localhost:4000/vehicles'); // Ensure this points to your vehicles endpoint
       this.setState({ vehicleCount: response.data.length });
     } catch (error) {
       console.error("Error fetching vehicle count:", error);
