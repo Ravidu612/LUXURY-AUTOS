@@ -4,9 +4,10 @@ import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, Ta
 import { Edit, Delete, Print, Add, ArrowBack } from '@mui/icons-material';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import AddUser from './AddUser';
 import { useNavigate } from 'react-router-dom';
 
-const URL = "http://localhost:4000/sales";
+const URL = "http://localhost:4000/users";
 
 const fetchHandler = async () => {
   try {
@@ -18,40 +19,40 @@ const fetchHandler = async () => {
   }
 };
 
-function SalesDetails() {
-  const [allSales, setAllSales] = useState([]);
-  const [sales, setSales] = useState([]);
+function UserDetails() {
+  const [allUsers, setAllUsers] = useState([]);
+  const [users, setUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [noResults, setNoResults] = useState(false);
-  const [showAddSalesForm, setShowAddSalesForm] = useState(false);
+  const [showAddUserForm, setShowAddUserForm] = useState(false);
   const [view, setView] = useState('table'); // For toggling views (table or stats)
 
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchHandler().then((data) => {
-      setAllSales(data);
-      setSales(data);
+      setAllUsers(data);
+      setUsers(data);
     }).catch(error => {
-      console.error("Error fetching sales:", error);
+      console.error("Error fetching users:", error);
     });
   }, []);
 
-  const handleEdit = (saleId) => {
-    navigate(`/admindashboard/update-sale/${saleId}`);
+  const handleEdit = (userId) => {
+    navigate(`/admindashboard/update-user/${userId}`);
   };
 
-  const deleteSale = async (saleId) => {
+  const deleteUser = async (userId) => {
     try {
-      const response = await axios.delete(`${URL}/${saleId}`);
+      const response = await axios.delete(`${URL}/${userId}`);
       if (response.status === 200) {
-        setAllSales(prev => prev.filter(sale => sale._id !== saleId));
-        setSales(prev => prev.filter(sale => sale._id !== saleId));
+        setAllUsers(prev => prev.filter(user => user.userId !== userId));
+        setUsers(prev => prev.filter(user => user.userId !== userId));
       } else {
         console.error("Unexpected response status:", response.status);
       }
     } catch (error) {
-      console.error("Error deleting sale:", error.response ? error.response.data : error.message);
+      console.error("Error deleting user:", error.response ? error.response.data : error.message);
     }
   };
 
@@ -64,11 +65,11 @@ function SalesDetails() {
     
     // Add a subtitle or description if needed
     doc.setFontSize(12);
-    doc.text("Sales Details Report", 10, 20);
+    doc.text("User Details Report", 10, 20);
 
     doc.autoTable({
-      head: [['Sale ID', 'Vehicle ID', 'Customer ID', 'Rental Period', 'Total Amount', 'Payment Status']],
-      body: sales.map(sale => [sale._id, sale.vehicleId, sale.customerId, sale.rentalPeriod, `$${sale.totalAmount}`, sale.paymentStatus]),
+      head: [['User ID', 'Username', 'Name', 'Email', 'Phone', 'Type']],
+      body: users.map(user => [user.userId, user.userName, user.name, user.email, user.phone, user.type]),
       startY: 30, // Adjust the starting position to leave space for the title
       margin: { top: 20 },
       styles: {
@@ -81,7 +82,7 @@ function SalesDetails() {
       },
     });
 
-    doc.save('sales-details.pdf');
+    doc.save('user-details.pdf');
   };
 
   const handleSearch = (e) => {
@@ -89,52 +90,52 @@ function SalesDetails() {
     setSearchQuery(query);
 
     if (query.trim() === "") {
-      setSales(allSales);
+      setUsers(allUsers);
       setNoResults(false);
       return;
     }
 
-    const filteredSales = allSales.filter(sale =>
-      Object.values(sale).some(field =>
+    const filteredUsers = allUsers.filter(user =>
+      Object.values(user).some(field =>
         field && field.toString().toLowerCase().includes(query.toLowerCase())
       )
     );
-    setSales(filteredSales);
-    setNoResults(filteredSales.length === 0);
+    setUsers(filteredUsers);
+    setNoResults(filteredUsers.length === 0);
   };
 
-  const handleAddSales = () => {
-    setShowAddSalesForm(true);
+  const handleAddUser = () => {
+    setShowAddUserForm(true);
   };
 
   const handleBack = () => {
-    setShowAddSalesForm(false);
+    setShowAddUserForm(false);
   };
 
   // Calculate statistics
-  const totalSales = sales.length;
-  const paymentStatusDistribution = sales.reduce((acc, sale) => {
-    acc[sale.paymentStatus] = (acc[sale.paymentStatus] || 0) + 1;
+  const totalUsers = users.length;
+  const userTypeDistribution = users.reduce((acc, user) => {
+    acc[user.type] = (acc[user.type] || 0) + 1;
     return acc;
   }, {});
 
   // Render the statistics view
   const renderStatsView = () => (
     <Box sx={{ padding: 3, backgroundColor: 'white', borderRadius: 1 }}>
-      <Typography variant="h5" gutterBottom>Total Sales: {totalSales}</Typography>
-      <Typography variant="h6" gutterBottom>Payment Status Distribution:</Typography>
+      <Typography variant="h5" gutterBottom>Total Users: {totalUsers}</Typography>
+      <Typography variant="h6" gutterBottom>User Types Distribution:</Typography>
       <TableContainer component={Paper} sx={{ border: '1px solid', borderColor: 'divider' }}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Payment Status</TableCell>
+              <TableCell>User Type</TableCell>
               <TableCell>Count</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {Object.entries(paymentStatusDistribution).map(([status, count]) => (
-              <TableRow key={status}>
-                <TableCell>{status}</TableCell>
+            {Object.entries(userTypeDistribution).map(([type, count]) => (
+              <TableRow key={type}>
+                <TableCell>{type}</TableCell>
                 <TableCell>{count}</TableCell>
               </TableRow>
             ))}
@@ -160,9 +161,9 @@ function SalesDetails() {
       >
         Back
       </Button>
-      {showAddSalesForm ? (
+      {showAddUserForm ? (
         <Box>
-          <AddSales onBack={handleBack} />
+          <AddUser onBack={handleBack} />
         </Box>
       ) : (
         <>
@@ -171,7 +172,7 @@ function SalesDetails() {
               label="Search"
               variant="outlined"
               value={searchQuery}
-              onChange={handleSearch}
+              onChange={handleSearch} // Update to call handleSearch on change
               sx={{
                 flexShrink: 1,
                 width: '200px',
@@ -202,11 +203,11 @@ function SalesDetails() {
             <Button
               variant="contained"
               color="secondary"
-              onClick={handleAddSales}
+              onClick={handleAddUser}
               sx={{ borderRadius: 2, marginLeft: 2 }}
               startIcon={<Add />}
             >
-              Add Sale
+              Add Owner
             </Button>
           </Box>
 
@@ -216,34 +217,34 @@ function SalesDetails() {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Sale ID</TableCell>
-                      <TableCell>Vehicle ID</TableCell>
-                      <TableCell>Customer ID</TableCell>
-                      <TableCell>Rental Period</TableCell>
-                      <TableCell>Total Amount</TableCell>
-                      <TableCell>Payment Status</TableCell>
+                      <TableCell>User ID</TableCell>
+                      <TableCell>Username</TableCell>
+                      <TableCell>Name</TableCell>
+                      <TableCell>Email</TableCell>
+                      <TableCell>Phone</TableCell>
+                      <TableCell>Type</TableCell>
                       <TableCell>Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {noResults ? (
                       <TableRow>
-                        <TableCell colSpan={7} align="center">No sales found.</TableCell>
+                        <TableCell colSpan={7} align="center">No users found.</TableCell>
                       </TableRow>
                     ) : (
-                      sales.map((sale) => (
-                        <TableRow key={sale._id}>
-                          <TableCell>{sale._id}</TableCell>
-                          <TableCell>{sale.vehicleId}</TableCell>
-                          <TableCell>{sale.customerId}</TableCell>
-                          <TableCell>{sale.rentalPeriod} days</TableCell>
-                          <TableCell>${sale.totalAmount}</TableCell>
-                          <TableCell>{sale.paymentStatus}</TableCell>
+                      users.filter(user => user.type === 'admin').map((user) => (
+                        <TableRow key={user.userId}>
+                          <TableCell>{user.userId}</TableCell>
+                          <TableCell>{user.userName}</TableCell>
+                          <TableCell>{user.name}</TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>{user.phone}</TableCell>
+                          <TableCell>{user.type}</TableCell>
                           <TableCell>
-                            <IconButton onClick={() => handleEdit(sale._id)} sx={{ color: 'primary.main' }}>
+                            <IconButton onClick={() => handleEdit(user.userId)} sx={{ color: 'primary.main' }}>
                               <Edit />
                             </IconButton>
-                            <IconButton onClick={() => deleteSale(sale._id)} sx={{ color: 'error.main' }}>
+                            <IconButton onClick={() => deleteUser(user.userId)} sx={{ color: 'error.main' }}>
                               <Delete />
                             </IconButton>
                           </TableCell>
@@ -272,4 +273,4 @@ function SalesDetails() {
   );
 }
 
-export default SalesDetails;
+export default UserDetails;
