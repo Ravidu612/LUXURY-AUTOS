@@ -108,14 +108,38 @@ const styles = StyleSheet.create({
 const VehiclePDF = ({ vehicle }) => (
     <Document>
         <Page style={styles.page}>
+            <View style={{ ...styles.section, alignItems: "center" }}>
+                <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>
+                    Vehicle Details
+                </Text>
+            </View>
             <View style={styles.section}>
-                <Text>Vehicle Name: {vehicle.name}</Text>
-                <Text>Type: {vehicle.type}</Text>
-                <Text>Fuel: {vehicle.fuel}</Text>
-                <Text>Seats: {vehicle.seats}</Text>
-                <Text>Transmission: {vehicle.transmission}</Text>
-                <Text>Price: ${vehicle.price}</Text>
-                <Text>Status: {vehicle.status}</Text>
+                <Text style={{ fontSize: 16, fontWeight: "bold" }}>Vehicle Name:</Text>
+                <Text style={{ fontSize: 14 }}>{vehicle.name}</Text>
+            </View>
+            <View style={styles.section}>
+                <Text style={{ fontSize: 16, fontWeight: "bold" }}>Type:</Text>
+                <Text style={{ fontSize: 14 }}>{vehicle.type}</Text>
+            </View>
+            <View style={styles.section}>
+                <Text style={{ fontSize: 16, fontWeight: "bold" }}>Fuel:</Text>
+                <Text style={{ fontSize: 14 }}>{vehicle.fuel}</Text>
+            </View>
+            <View style={styles.section}>
+                <Text style={{ fontSize: 16, fontWeight: "bold" }}>Seats:</Text>
+                <Text style={{ fontSize: 14 }}>{vehicle.seats}</Text>
+            </View>
+            <View style={styles.section}>
+                <Text style={{ fontSize: 16, fontWeight: "bold" }}>Transmission:</Text>
+                <Text style={{ fontSize: 14 }}>{vehicle.transmission}</Text>
+            </View>
+            <View style={styles.section}>
+                <Text style={{ fontSize: 16, fontWeight: "bold" }}>Price:</Text>
+                <Text style={{ fontSize: 14 }}>${vehicle.price}</Text>
+            </View>
+            <View style={styles.section}>
+                <Text style={{ fontSize: 16, fontWeight: "bold" }}>Status:</Text>
+                <Text style={{ fontSize: 14 }}>{vehicle.status}</Text>
             </View>
         </Page>
     </Document>
@@ -300,10 +324,15 @@ const VehicleDetails = () => {
                                             <FaDownload />
                                         </IconButton>
                                     </PDFDownloadLink>
-                                    <IconButton onClick={() => handleDeleteVehicle(vehicle.vehicleId)}>
+                                    <IconButton
+                                        onClick={() => {
+                                            if (window.confirm("Are you sure you want to delete this vehicle?")) {
+                                                handleDeleteVehicle(vehicle.vehicleId);
+                                            }
+                                        }}
+                                    >
                                         <FaTrash />
                                     </IconButton>
-                                    
                                 </Box>
                             </CardContent>
                         </Card>
@@ -368,7 +397,6 @@ const VehicleDetails = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-            
         </Box>
     );
 };
