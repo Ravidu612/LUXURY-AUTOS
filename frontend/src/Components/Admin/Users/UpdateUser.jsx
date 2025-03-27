@@ -146,6 +146,9 @@ function UpdateUser() {
         >
           <MenuItem value="user">User</MenuItem>
           <MenuItem value="admin">Admin</MenuItem>
+          <MenuItem value="Owner">Owner</MenuItem>
+          <MenuItem value="Customer">Customer</MenuItem>
+
         </Select>
       </FormControl>
       <Button

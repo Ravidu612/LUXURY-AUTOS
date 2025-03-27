@@ -244,6 +244,10 @@ const VehiclePage = () => {
                     <MenuItem value="Sedan">Sedan</MenuItem>
                     <MenuItem value="SUV">SUV</MenuItem>
                     <MenuItem value="Truck">Truck</MenuItem>
+                    <MenuItem value="Bus">Bus</MenuItem>
+                    <MenuItem value="Bike">Bike</MenuItem>
+                    <MenuItem value="Van">Van</MenuItem>
+
                 </Select>
                 <Select
                     fullWidth

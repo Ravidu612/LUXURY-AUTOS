@@ -303,6 +303,7 @@ const VehicleDetails = () => {
                                     <IconButton onClick={() => handleDeleteVehicle(vehicle.vehicleId)}>
                                         <FaTrash />
                                     </IconButton>
+                                    
                                 </Box>
                             </CardContent>
                         </Card>
@@ -346,6 +347,7 @@ const VehicleDetails = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            
         </Box>
     );
 };

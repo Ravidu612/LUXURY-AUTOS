@@ -89,13 +89,17 @@ function AddUser({ onBack }) {
           margin="normal"
         />
         <TextField
-          label="Phone"
-          variant="outlined"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          fullWidth
-          margin="normal"
-        />
+  label="Phone"
+  variant="outlined"
+  value={phone}
+  onChange={(e) => {
+    const newValue = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+    setPhone(newValue);
+  }}
+  fullWidth
+  margin="normal"
+/>
+
         <FormControl fullWidth margin="normal">
           <InputLabel>User Type</InputLabel>
           <Select

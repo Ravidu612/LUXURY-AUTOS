@@ -1,70 +1,25 @@
 import React, { useState } from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Select, MenuItem } from "@mui/material";
+import {
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
+  Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField,
+  Select, MenuItem, InputAdornment, IconButton, Typography
+} from "@mui/material";
+import { Add, Edit, Delete, Search } from "@mui/icons-material";
 
 const BookingDetails = () => {
   const [bookings, setBookings] = useState([
-    {
-      bookingId: "B001",
-      customerId: "C123",
-      vehicleId: "V456",
-      pickUpLocation: "New York",
-      status: "Confirmed",
-      dateFrom: "2025-04-01",
-      dateTo: "2025-04-05",
-    },
-    {
-      bookingId: "B002",
-      customerId: "C789",
-      vehicleId: "V654",
-      pickUpLocation: "Los Angeles",
-      status: "Pending",
-      dateFrom: "2025-04-10",
-      dateTo: "2025-04-15",
-    },
+    { bookingId: "B001", customerId: "C123", vehicleId: "V456", pickUpLocation: "New York", status: "Confirmed", dateFrom: "2025-04-01", dateTo: "2025-04-05" },
+    { bookingId: "B002", customerId: "C789", vehicleId: "V654", pickUpLocation: "Los Angeles", status: "Pending", dateFrom: "2025-04-10", dateTo: "2025-04-15" },
   ]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
-  const [filterDateFrom, setFilterDateFrom] = useState("");
-  const [filterDateTo, setFilterDateTo] = useState("");
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [currentBooking, setCurrentBooking] = useState({
-    bookingId: "",
-    customerId: "",
-    vehicleId: "",
-    pickUpLocation: "",
-    status: "",
-    dateFrom: "",
-    dateTo: "",
-  });
+  const [currentBooking, setCurrentBooking] = useState(null);
 
   const handleOpenDialog = (booking = null) => {
-    setCurrentBooking(booking || {
-      bookingId: `B00${bookings.length + 1}`,
-      customerId: "",
-      vehicleId: "",
-      pickUpLocation: "",
-      status: "",
-      dateFrom: "",
-      dateTo: "",
-    });
+    setCurrentBooking(booking || { bookingId: `B00${bookings.length + 1}`, customerId: "", vehicleId: "", pickUpLocation: "", status: "", dateFrom: "", dateTo: "" });
     setOpenDialog(true);
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setCurrentBooking(null);
-  };
-
-  const handleOpenDeleteDialog = (booking) => {
-    setCurrentBooking(booking);
-    setOpenDeleteDialog(true);
-  };
-
-  const handleDeleteBooking = () => {
-    setBookings(bookings.filter((b) => b.bookingId !== currentBooking.bookingId));
-    setOpenDeleteDialog(false);
   };
 
   const handleSaveBooking = () => {
@@ -75,77 +30,77 @@ const BookingDetails = () => {
     setOpenDialog(false);
   };
 
-  const handleChange = (e) => {
-    setCurrentBooking({ ...currentBooking, [e.target.name]: e.target.value });
-  };
-
-  const filteredBookings = bookings.filter((booking) =>
-    (booking.customerId.includes(searchQuery) || booking.vehicleId.includes(searchQuery)) &&
-    (filterStatus === "" || booking.status === filterStatus) &&
-    (filterDateFrom === "" || new Date(booking.dateFrom) >= new Date(filterDateFrom)) &&
-    (filterDateTo === "" || new Date(booking.dateTo) <= new Date(filterDateTo))
-  );
+  const filteredBookings = bookings.filter((booking) => {
+    const searchLower = searchQuery.toLowerCase();
+    return (booking.customerId.toLowerCase().includes(searchLower) || booking.vehicleId.toLowerCase().includes(searchLower)) &&
+           (filterStatus === "" || booking.status === filterStatus);
+  });
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-semibold mb-4">Booking Details</h2>
-      <div className="flex gap-4 mb-4">
+    <div style={{ padding: "24px", backgroundColor: "#f4f6f8", minHeight: "100vh" }}>
+      <Typography variant="h4" fontWeight="bold" gutterBottom>🚗 Booking Management</Typography>
+
+      {/* Filters & Search */}
+      <div style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
         <TextField
-          label="Search by Customer ID or Vehicle ID"
+          label="Search Customer/Vehicle"
           variant="outlined"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <Search />
+              </InputAdornment>
+            ),
+          }}
+          style={{ flex: "1" }}
         />
-        <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} displayEmpty>
+        <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} displayEmpty variant="outlined" style={{ minWidth: "150px" }}>
           <MenuItem value="">All Statuses</MenuItem>
-          <MenuItem value="Confirmed">Confirmed</MenuItem>
-          <MenuItem value="Pending">Pending</MenuItem>
+          <MenuItem value="Confirmed">✅ Confirmed</MenuItem>
+          <MenuItem value="Pending">⏳ Pending</MenuItem>
         </Select>
-        <TextField
-          label="From Date"
-          type="date"
-          InputLabelProps={{ shrink: true }}
-          value={filterDateFrom}
-          onChange={(e) => setFilterDateFrom(e.target.value)}
-          className="flex-1"
-        />
-        <TextField
-          label="To Date"
-          type="date"
-          InputLabelProps={{ shrink: true }}
-          value={filterDateTo}
-          onChange={(e) => setFilterDateTo(e.target.value)}
-          className="flex-1"
-        />
-      <Button variant="contained" color="primary" onClick={() => handleOpenDialog()}>Add Booking</Button>
+        <Button variant="contained" color="primary" startIcon={<Add />} onClick={() => handleOpenDialog()}>Add Booking</Button>
       </div>
-      <TableContainer component={Paper} className="mt-4">
+
+      {/* Booking Table */}
+      <TableContainer component={Paper} elevation={3}>
         <Table>
           <TableHead>
-            <TableRow>
-              <TableCell>Booking ID</TableCell>
-              <TableCell>Customer ID</TableCell>
-              <TableCell>Vehicle ID</TableCell>
-              <TableCell>Pick-up Location</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Date From</TableCell>
-              <TableCell>Date To</TableCell>
-              <TableCell>Actions</TableCell>
+            <TableRow style={{ backgroundColor: "#eeeeee" }}>
+              <TableCell><b>Booking ID</b></TableCell>
+              <TableCell><b>Customer ID</b></TableCell>
+              <TableCell><b>Vehicle ID</b></TableCell>
+              <TableCell><b>Pick-up Location</b></TableCell>
+              <TableCell><b>Status</b></TableCell>
+              <TableCell><b>Date From</b></TableCell>
+              <TableCell><b>Date To</b></TableCell>
+              <TableCell><b>Actions</b></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredBookings.map((booking, index) => (
-              <TableRow key={index}>
+            {filteredBookings.map((booking) => (
+              <TableRow key={booking.bookingId} hover>
                 <TableCell>{booking.bookingId}</TableCell>
                 <TableCell>{booking.customerId}</TableCell>
                 <TableCell>{booking.vehicleId}</TableCell>
                 <TableCell>{booking.pickUpLocation}</TableCell>
-                <TableCell>{booking.status}</TableCell>
+                <TableCell>
+                  <span style={{
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    backgroundColor: booking.status === "Confirmed" ? "#4caf50" : "#ff9800",
+                    color: "white",
+                  }}>
+                    {booking.status}
+                  </span>
+                </TableCell>
                 <TableCell>{booking.dateFrom}</TableCell>
                 <TableCell>{booking.dateTo}</TableCell>
                 <TableCell>
-                  <Button color="primary" onClick={() => handleOpenDialog(booking)}>Edit</Button>
-                  <Button color="secondary" onClick={() => handleOpenDeleteDialog(booking)}>Delete</Button>
+                  <IconButton color="primary" onClick={() => handleOpenDialog(booking)}><Edit /></IconButton>
+                  <IconButton color="error" onClick={() => setBookings(bookings.filter((b) => b.bookingId !== booking.bookingId))}><Delete /></IconButton>
                 </TableCell>
               </TableRow>
             ))}
@@ -154,29 +109,22 @@ const BookingDetails = () => {
       </TableContainer>
 
       {/* Add/Edit Dialog */}
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>{currentBooking?.bookingId ? "Edit Booking" : "Add Booking"}</DialogTitle>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>{currentBooking?.bookingId ? "✏️ Edit Booking" : "➕ Add Booking"}</DialogTitle>
         <DialogContent>
-          <TextField fullWidth margin="dense" name="customerId" label="Customer ID" value={currentBooking.customerId} onChange={handleChange} />
-          <TextField fullWidth margin="dense" name="vehicleId" label="Vehicle ID" value={currentBooking.vehicleId} onChange={handleChange} />
-          <TextField fullWidth margin="dense" name="pickUpLocation" label="Pick-up Location" value={currentBooking.pickUpLocation} onChange={handleChange} />
-          <TextField fullWidth margin="dense" name="status" label="Status" value={currentBooking.status} onChange={handleChange} />
-          <TextField fullWidth margin="dense" name="dateFrom" label="Date From" type="date" value={currentBooking.dateFrom} onChange={handleChange} />
-          <TextField fullWidth margin="dense" name="dateTo" label="Date To" type="date" value={currentBooking.dateTo} onChange={handleChange} />
+          <TextField fullWidth margin="dense" label="Customer ID" value={currentBooking?.customerId || ""} onChange={(e) => setCurrentBooking({ ...currentBooking, customerId: e.target.value })} />
+          <TextField fullWidth margin="dense" label="Vehicle ID" value={currentBooking?.vehicleId || ""} onChange={(e) => setCurrentBooking({ ...currentBooking, vehicleId: e.target.value })} />
+          <TextField fullWidth margin="dense" label="Pick-up Location" value={currentBooking?.pickUpLocation || ""} onChange={(e) => setCurrentBooking({ ...currentBooking, pickUpLocation: e.target.value })} />
+          <Select fullWidth value={currentBooking?.status || ""} onChange={(e) => setCurrentBooking({ ...currentBooking, status: e.target.value })}>
+            <MenuItem value="Confirmed">✅ Confirmed</MenuItem>
+            <MenuItem value="Pending">⏳ Pending</MenuItem>
+          </Select>
+          <TextField fullWidth margin="dense" label="Date From" type="date" InputLabelProps={{ shrink: true }} value={currentBooking?.dateFrom || ""} onChange={(e) => setCurrentBooking({ ...currentBooking, dateFrom: e.target.value })} />
+          <TextField fullWidth margin="dense" label="Date To" type="date" InputLabelProps={{ shrink: true }} value={currentBooking?.dateTo || ""} onChange={(e) => setCurrentBooking({ ...currentBooking, dateTo: e.target.value })} />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button color="primary" onClick={handleSaveBooking}>Save</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>Are you sure you want to delete this booking?</DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
-          <Button color="secondary" onClick={handleDeleteBooking}>Delete</Button>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+          <Button variant="contained" color="primary" onClick={handleSaveBooking}>Save</Button>
         </DialogActions>
       </Dialog>
     </div>
