@@ -322,8 +322,13 @@ const VehicleDetails = () => {
                                 label={field.charAt(0).toUpperCase() + field.slice(1)}
                                 name={field}
                                 value={selectedVehicle[field] || ""}
-                                onChange={handleUpdateChange}
+                                onChange={(e) => {
+                                    const { name, value } = e.target;
+                                    const updatedValue = name === "seats" || name === "price" ? parseInt(value) || 0 : value;
+                                    setSelectedVehicle((prev) => ({ ...prev, [name]: updatedValue }));
+                                }}
                                 margin="dense"
+                                type={field === "seats" || field === "price" ? "number" : "text"}
                             />
                         ))
                     )}
@@ -339,6 +344,22 @@ const VehicleDetails = () => {
                     <TextField fullWidth label="Vehicle ID" name="vehicleId" value={newVehicle.vehicleId} onChange={handleChange} />
                     <TextField fullWidth label="Image URL" name="image" value={newVehicle.image} onChange={handleChange} />
                     <TextField fullWidth label="Name" name="name" value={newVehicle.name} onChange={handleChange} />
+                    <TextField
+                        fullWidth
+                        label="Seats"
+                        name="seats"
+                        value={newVehicle.seats}
+                        onChange={(e) => handleChange({ target: { name: "seats", value: parseInt(e.target.value) || 0 } })}
+                        type="number"
+                    />
+                    <TextField
+                        fullWidth
+                        label="Price"
+                        name="price"
+                        value={newVehicle.price}
+                        onChange={(e) => handleChange({ target: { name: "price", value: parseInt(e.target.value) || 0 } })}
+                        type="number"
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
