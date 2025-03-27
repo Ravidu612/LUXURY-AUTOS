@@ -5,6 +5,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import { AuthContext } from '../Auth/AuthContext'; // Import your AuthContext
+import EFpage from '../ExtraFeature/EFpage';
 
 const drawerWidth = 210;
 const sidebarBackground = 'path_to_image'; // Replace with actual image URL or import statement
@@ -14,7 +15,7 @@ function AdminDashboard() {
   const location = useLocation();
   const { logout } = useContext(AuthContext); // Access logout function from AuthContext
   const [fadeIn, setFadeIn] = useState(false);
-
+  const [showEFPage, setShowEFPage] = useState(false);
   const [currentTab, setCurrentTab] = useState('');
   const [showSupplierListButton, setShowSupplierListButton] = useState(false);
 
@@ -48,6 +49,10 @@ function AdminDashboard() {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const toggleView = () => {
+    setShowEFPage((prev) => !prev);
   };
 
   const handleSupplierListButtonClick = () => {
@@ -93,6 +98,9 @@ function AdminDashboard() {
             </ListItem>
           ))}
         </List>
+        <Button variant="contained" sx={{ m: 2, bgcolor:" #0062ff", color:" #000000" }} onClick={toggleView}>
+          {showEFPage ? 'Show Dashboard' : 'Luxy Support'}
+        </Button>
       </Drawer>
       <Box
         component="main"
@@ -120,7 +128,7 @@ function AdminDashboard() {
           </div>
         </Box>
 
-        <Outlet /> {/* Render nested routes */}
+        {showEFPage ? <EFpage /> : <Outlet />}
       </Box>
     </Box>
   );
