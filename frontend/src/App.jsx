@@ -31,7 +31,7 @@ import Booking from './Components/Admin/Booking/Booking';
 import BookingPage from './Components/Home/Bookingpage';
 import { AuthProvider } from './Components/Auth/AuthContext';  // Import AuthProvider
 import VehiclePage from './Components/Home/Vehicle';
-import RentalDashboard from './Components/Admin/Rental/RentalList';
+import RentalList from './Components/Admin/Rental/RentalList';
 
 
 
@@ -69,17 +69,14 @@ function App() {
             <Route path="customer-management" element={<Customer />} />
           </Route>
 
-          <Route path="/rental-list" element={<RentalDashboard />} >
-            <Route path="-" element={<UserDetails />} />
-            <Route path="-" element={<Owner />} />
-            <Route path="-" element={<Customer />} />
-          </Route>
-
+          
           <Route path="/admindashboard" element={<AdminDashboard />}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="userlist" element={<Userlist />} />
             <Route path="adduser" element={<AddUser />} />
             <Route path="update-user/:id" element={<UpdateUser />} />
+            <Route path="rental" element={<RentalList />} />
+
 
             <Route path="Vehicle-management" element={<VehicleDetails />} />
             <Route path="Vehicle/:VID" element={<Vehicle />} />
