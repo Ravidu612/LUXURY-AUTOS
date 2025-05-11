@@ -1,15 +1,15 @@
 const mongoose = require('mongoose');
 
 const VehicleSchema = new mongoose.Schema({
-  vehicleId: { type: String, required: true, unique: true },
+  vehicleId: { type: String, required: false},
   image: { type: String },
-  name: { type: String, required: true },
-  type: { type: String, required: true, enum: ['Sedan', 'SUV', 'Truck', 'Van', 'Convertible', 'Coupe'] },
-  fuel: { type: String, required: true, enum: ['Petrol', 'Diesel', 'Electric', 'Hybrid'] },
-  seats: { type: Number, required: true, min: 1 }, // Minimum 1 seat
-  transmission: { type: String, required: true, enum: ['Manual', 'Automatic'] },
-  price: { type: Number, required: true, min: 0 }, // Price should be positive
-  status: { type: String, required: true, enum: ['Available', 'Unavailable', 'In Maintenance'] },
+  name: { type: String, required: false },
+  type: { type: String, required: false},
+  fuel: { type: String, required: false },
+  seats: { type: Number, required: false }, // Minimum 1 seat
+  transmission: { type: String, required: false},
+  price: { type: Number, required: false }, // Price should be positive
+  status: { type: String, required: false},
 });
 
-module.exports = mongoose.model('Vehicle', VehicleSchema);
+module.exports = mongoose.model('VehicleSchema', VehicleSchema);

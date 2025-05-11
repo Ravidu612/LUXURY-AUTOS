@@ -21,7 +21,7 @@ app.use(cors()); // Configurable if needed with CORS options
 
 // Route middleware
 app.use('/users', userRoutes);
-app.use('/Vehicles', VehiclesRoutes);
+app.use('/vehicles', VehiclesRoutes);
 app.use('/customers', customerRoutes);
 app.use('/payment', paymentRoutes);
 app.use('/promotions', promotionRoutes);  // Prefix for promotion routes

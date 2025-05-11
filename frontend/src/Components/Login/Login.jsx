@@ -7,7 +7,7 @@ import Footer from '../Footer/Footer';
 import { Box, Button, Container, Grid, TextField, Typography, Paper, Divider } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 import PersonIcon from '@mui/icons-material/Person';
-import log from '../Images/car.png';
+import log from "../Images/newCar.png"; // Updated the image path
 
 function Login() {
     const navigate = useNavigate();

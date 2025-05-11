@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Box, Button, TextField, Typography, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-const URL = "http://localhost:4000/vehicles"; // Ensure correct API endpoint
+const URL = "http://localhost:4000/vehicles/"; // Ensure correct API endpoint
 
 function AddVehicle({ onBack }) {
   const [vehicle, setVehicle] = useState({
@@ -28,7 +28,7 @@ function AddVehicle({ onBack }) {
     setError(null);
 
     // Validation
-    if (!vehicle.image || !vehicle.name || !vehicle.type || !vehicle.fuel || !vehicle.seats || !vehicle.transmission || !vehicle.price ) {
+    if (  !vehicle.name || !vehicle.type || !vehicle.fuel || !vehicle.seats || !vehicle.transmission || !vehicle.price ) {
       setError('Please fill in all fields.');
       return;
     }
@@ -80,6 +80,7 @@ function AddVehicle({ onBack }) {
           fullWidth
           margin="normal"
         />
+        
         <FormControl fullWidth margin="normal">
           <InputLabel>Type</InputLabel>
           <Select name="type" value={vehicle.type} onChange={handleChange}>
@@ -113,13 +114,19 @@ function AddVehicle({ onBack }) {
             <MenuItem value="Automatic">Automatic</MenuItem>
             <MenuItem value="Manual">Manual</MenuItem>
           </Select>
+          
         </FormControl>
         <TextField
           label="Price"
           name="price"
           type="number"
           value={vehicle.price}
-          onChange={handleChange}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (!isNaN(value) && Number(value) >= 0) {
+              handleChange(e);
+            }
+          }}
           fullWidth
           margin="normal"
         />

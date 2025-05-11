@@ -14,9 +14,11 @@ const generateVehicleId = async () => {
 // Create a new vehicle
 exports.createVehicle = async (req, res) => {
     try {
-        const { image, name, type, fuel, seats, transmission, price, status } = req.body;
+        const { vehicleId,image, name, type, fuel, seats, transmission, price, status } = req.body;
 
-        const vehicleId = await generateVehicleId();
+        console.log('Received data:', req.body); // Debugging line
+
+        // const vehicleId = await generateVehicleId();
         const newVehicle = new Vehicle({
             vehicleId,
             image,  // Save the URL as is
@@ -33,6 +35,7 @@ exports.createVehicle = async (req, res) => {
         res.status(201).json({ message: 'Vehicle created successfully', vehicle: newVehicle });
     } catch (error) {
         res.status(500).json({ message: 'Error creating vehicle', error: error.message });
+        console.error('Error creating vehicle:', error); // Debugging line
     }
 };
 
