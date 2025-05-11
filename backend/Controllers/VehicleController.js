@@ -14,7 +14,7 @@ const generateVehicleId = async () => {
 // Create a new vehicle
 exports.createVehicle = async (req, res) => {
     try {
-        const { vehicleId,image, name, type, fuel, seats, transmission, price, status } = req.body;
+        const { vehicleId,image, name, type, fuel, seats, transmission, price, status, location, from, to } = req.body;
 
         console.log('Received data:', req.body); // Debugging line
 
@@ -28,7 +28,10 @@ exports.createVehicle = async (req, res) => {
             seats,
             transmission,
             price,
-            status
+            status,
+            location,
+            from,
+            to
         });
 
         await newVehicle.save();
@@ -66,8 +69,8 @@ exports.getVehicleById = async (req, res) => {
 // Update a vehicle by ID
 exports.updateVehicle = async (req, res) => {
     try {
-        const { image, name, type, fuel, seats, transmission, price, status } = req.body;
-        const updateData = { image, name, type, fuel, seats, transmission, price, status };
+        const { image, name, type, fuel, seats, transmission, price, status, location, from, to } = req.body;
+        const updateData = { image, name, type, fuel, seats, transmission, price, status, location, from, to };
 
         const updatedVehicle = await Vehicle.findOneAndUpdate(
             { vehicleId: req.params.id },
