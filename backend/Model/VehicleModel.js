@@ -10,6 +10,9 @@ const VehicleSchema = new mongoose.Schema({
   transmission: { type: String, required: false},
   price: { type: Number, required: false }, // Price should be positive
   status: { type: String, required: false},
+  location: { type: String, required: false },
+  from: { type: Date, required: false },
+  to: { type: Date, required: false },
 });
 
 module.exports = mongoose.model('VehicleSchema', VehicleSchema);

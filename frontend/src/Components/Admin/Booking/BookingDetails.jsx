@@ -9,40 +9,115 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 
 const BookingDetails = () => {
-  const [bookings, setBookings] = useState([
-    { bookingId: "B001", customerId: "C123", vehicleId: "V456", pickUpLocation: "Colombo", status: "Confirmed", dateFrom: "2025-04-01", dateTo: "2025-04-05" },
-    { bookingId: "B002", customerId: "C789", vehicleId: "V654", pickUpLocation: "Kandy", status: "Pending", dateFrom: "2025-04-10", dateTo: "2025-04-15" },
-    { bookingId: "B003", customerId: "C321", vehicleId: "V987", pickUpLocation: "Galle", status: "Confirmed", dateFrom: "2025-04-20", dateTo: "2025-04-25" },
-    { bookingId: "B004", customerId: "C654", vehicleId: "V321", pickUpLocation: "Jaffna", status: "Pending", dateFrom: "2025-04-30", dateTo: "2025-05-05" },
-    { bookingId: "B005", customerId: "C987", vehicleId: "V789", pickUpLocation: "Nuwara Eliya", status: "Confirmed", dateFrom: "2025-05-10", dateTo: "2025-05-15" },
-    { bookingId: "B006", customerId: "C111", vehicleId: "V222", pickUpLocation: "Anuradhapura", status: "Confirmed", dateFrom: "2025-05-20", dateTo: "2025-05-25" },
-    { bookingId: "B007", customerId: "C222", vehicleId: "V333", pickUpLocation: "Trincomalee", status: "Pending", dateFrom: "2025-06-01", dateTo: "2025-06-05" },
-    { bookingId: "B008", customerId: "C333", vehicleId: "V444", pickUpLocation: "Batticaloa", status: "Confirmed", dateFrom: "2025-06-10", dateTo: "2025-06-15" },
-    { bookingId: "B009", customerId: "C444", vehicleId: "V555", pickUpLocation: "Negombo", status: "Pending", dateFrom: "2025-06-20", dateTo: "2025-06-25" },
-    { bookingId: "B010", customerId: "C555", vehicleId: "V666", pickUpLocation: "Matara", status: "Confirmed", dateFrom: "2025-07-01", dateTo: "2025-07-05" },
-    { bookingId: "B011", customerId: "C666", vehicleId: "V777", pickUpLocation: "Ratnapura", status: "Pending", dateFrom: "2025-07-10", dateTo: "2025-07-15" },
-    { bookingId: "B012", customerId: "C777", vehicleId: "V888", pickUpLocation: "Badulla", status: "Confirmed", dateFrom: "2025-07-20", dateTo: "2025-07-25" },
-    { bookingId: "B013", customerId: "C888", vehicleId: "V999", pickUpLocation: "Polonnaruwa", status: "Pending", dateFrom: "2025-08-01", dateTo: "2025-08-05" },
-    { bookingId: "B014", customerId: "C999", vehicleId: "V000", pickUpLocation: "Kurunegala", status: "Confirmed", dateFrom: "2025-08-10", dateTo: "2025-08-15" },
-    { bookingId: "B015", customerId: "C000", vehicleId: "V111", pickUpLocation: "Hambantota", status: "Pending", dateFrom: "2025-08-20", dateTo: "2025-08-25" },
-  ]);
-
+  const [bookings, setBookings] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
+  const [openAddDialog, setOpenAddDialog] = useState(false);
   const [currentBooking, setCurrentBooking] = useState(null);
 
+  React.useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  const fetchBookings = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/vehiclebookings");
+      if (!response.ok) {
+        throw new Error("Failed to fetch bookings");
+      }
+      const data = await response.json();
+      setBookings(data);
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+    }
+  };
+
+  const handleOpenAddDialog = (booking = null) => {
+    setCurrentBooking(
+      booking || {
+        bookingId: `B00${bookings.length + 1}`,
+        customerId: "",
+        vehicleId: "",
+        pickUpLocation: "",
+        status: "",
+        dateFrom: "",
+        dateTo: "",
+      }
+    );
+    setOpenAddDialog(true);
+  };
+
   const handleOpenDialog = (booking = null) => {
-    setCurrentBooking(booking || { bookingId: `B00${bookings.length + 1}`, customerId: "", vehicleId: "", pickUpLocation: "", status: "", dateFrom: "", dateTo: "" });
+    setCurrentBooking(
+      booking || {
+        bookingId: `B00${bookings.length + 1}`,
+        customerId: "",
+        vehicleId: "",
+        pickUpLocation: "",
+        status: "",
+        dateFrom: "",
+        dateTo: "",
+      }
+    );
     setOpenDialog(true);
   };
 
-  const handleSaveBooking = () => {
-    setBookings((prev) => {
-      const exists = prev.find((b) => b.bookingId === currentBooking.bookingId);
-      return exists ? prev.map((b) => (b.bookingId === currentBooking.bookingId ? currentBooking : b)) : [...prev, currentBooking];
-    });
-    setOpenDialog(false);
+  const handleSaveBooking = async () => {
+    try {
+      // Update existing booking
+      const response = await fetch(
+        `http://localhost:4000/vehiclebookings/${currentBooking._id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(currentBooking),
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to update booking");
+      }
+
+      fetchBookings();
+      setOpenAddDialog(false);
+    } catch (error) {
+      console.error("Error saving booking:", error);
+    }
+  };
+
+  const handleAddBooking = async () => {
+    try {
+      if (currentBooking.bookingId.startsWith("B00")) {
+        // Create new booking
+        const response = await fetch("http://localhost:4000/vehiclebookings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(currentBooking),
+        });
+        if (!response.ok) {
+          throw new Error("Failed to create booking");
+        }
+      }
+      fetchBookings();
+      setOpenAddDialog(false);
+    } catch (error) {
+      console.error("Error saving booking:", error);
+    }
+  };
+
+  const handleDeleteBooking = async (_id) => {
+    try {
+      const response = await fetch(
+        `http://localhost:4000/vehiclebookings/${_id}`,
+        { method: "DELETE" }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to delete booking");
+      }
+      fetchBookings();
+    } catch (error) {
+      console.error("Error deleting booking:", error);
+    }
   };
 
   const filteredBookings = bookings.filter((booking) => {
@@ -59,7 +134,17 @@ const BookingDetails = () => {
     const doc = new jsPDF();
     doc.text("Booking Details", 14, 10);
     doc.autoTable({
-      head: [["Booking ID", "Customer ID", "Vehicle ID", "Pick-up Location", "Status", "Date From", "Date To"]],
+      head: [
+        [
+          "Booking ID",
+          "Customer ID",
+          "Vehicle ID",
+          "Pick-up Location",
+          "Status",
+          "Date From",
+          "Date To",
+        ],
+      ],
       body: bookings.map((booking) => [
         booking.bookingId,
         booking.customerId,
@@ -75,99 +160,168 @@ const BookingDetails = () => {
 
   return (
     <div style={{ padding: "24px", backgroundColor: "#f4f6f8", minHeight: "100vh" }}>
-      <Typography variant="h4" fontWeight="bold" gutterBottom>🚗 Booking Management</Typography>
+      <Typography variant="h4" fontWeight="bold" gutterBottom>
+        🚗 Booking Management
+      </Typography>
 
-        <div style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
-          <TextField
-            label="Search Customer/Vehicle"
-            variant="outlined"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <Search />
-            </InputAdornment>
-          ),
-            }}
-            style={{ flex: "1" }}
-          />
-          <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} displayEmpty variant="outlined" style={{ minWidth: "150px" }}>
-            <MenuItem value="">All Statuses</MenuItem>
-            <MenuItem value="Confirmed">✅ Confirmed</MenuItem>
-            <MenuItem value="Pending">⏳ Pending</MenuItem>
-            <MenuItem value="Cancelled">❌ Cancelled</MenuItem>
+      <div style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
+        <TextField
+          label="Search Customer/Vehicle"
+          variant="outlined"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <Search />
+              </InputAdornment>
+            ),
+          }}
+          style={{ flex: "1" }}
+        />
+        <Select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          displayEmpty
+          variant="outlined"
+          style={{ minWidth: "150px" }}
+        >
+          <MenuItem value="">All Statuses</MenuItem>
+          <MenuItem value="Confirmed">✅ Confirmed</MenuItem>
+          <MenuItem value="Pending">⏳ Pending</MenuItem>
+          <MenuItem value="Cancelled">❌ Cancelled</MenuItem>
+        </Select>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<Add />}
+          onClick={() => handleOpenAddDialog()}
+        >
+          Add Booking
+        </Button>
+      </div>
 
-          </Select>
-          <Button variant="contained" color="primary" startIcon={<Add />} onClick={() => handleOpenDialog()}>Add Booking</Button>
-        </div>
-
-          <TableContainer component={Paper} elevation={3}>
-            <Table>
+      <TableContainer component={Paper} elevation={3}>
+        <Table>
           <TableHead>
             <TableRow style={{ backgroundColor: "#eeeeee" }}>
-          <TableCell><b>Booking ID</b></TableCell>
-          <TableCell><b>Customer ID</b></TableCell>
-          <TableCell><b>Vehicle ID</b></TableCell>
-          <TableCell><b>Pick-up Location</b></TableCell>
-          <TableCell><b>Status</b></TableCell>
-          <TableCell><b>Date From</b></TableCell>
-          <TableCell><b>Date To</b></TableCell>
-          <TableCell><b>Actions</b></TableCell>
+              <TableCell><b>Booking ID</b></TableCell>
+              <TableCell><b>Customer ID</b></TableCell>
+              <TableCell><b>Vehicle ID</b></TableCell>
+              <TableCell><b>Pick-up Location</b></TableCell>
+              <TableCell><b>Status</b></TableCell>
+              <TableCell><b>Date From</b></TableCell>
+              <TableCell><b>Date To</b></TableCell>
+              <TableCell><b>Actions</b></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredBookings.map((booking) => (
-          <TableRow key={booking.bookingId} hover>
-            <TableCell>{booking.bookingId}</TableCell>
-            <TableCell>{booking.customerId}</TableCell>
-            <TableCell>{booking.vehicleId}</TableCell>
-            <TableCell>{booking.pickUpLocation}</TableCell>
-            <TableCell>
-          <span style={{
-            padding: "4px 8px",
-            borderRadius: "4px",
-            backgroundColor: booking.status === "Confirmed" ? "#4caf50" : 
-                   booking.status === "Pending" ? "#ff9800" : "#f44336",
-            color: "white",
-          }}>
-            {booking.status}
-          </span>
-            </TableCell>
-            <TableCell>{booking.dateFrom}</TableCell>
-            <TableCell>{booking.dateTo}</TableCell>
-            <TableCell>
-          <IconButton color="primary" onClick={() => handleOpenDialog(booking)}><Edit /></IconButton>
-          <IconButton
-            color="error"
-            onClick={() => {
-                if (window.confirm(`Are you sure you want to delete booking ${booking.bookingId}?`)) {
-              setBookings(bookings.filter((b) => b.bookingId !== booking.bookingId));
-                }
-              }}
-            >
-              <Delete />
-            </IconButton>
-            <IconButton color="primary" onClick={() => handlePrintPDF(booking)}><Download /></IconButton>
-              </TableCell>
-            </TableRow>
-          ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              <TableRow key={booking.bookingId} hover>
+                <TableCell>{booking.bookingId}</TableCell>
+                <TableCell>{booking.customerId}</TableCell>
+                <TableCell>{booking.vehicleId}</TableCell>
+                <TableCell>{booking.pickUpLocation}</TableCell>
+                <TableCell>
+                  <span
+                    style={{
+                      padding: "4px 8px",
+                      borderRadius: "4px",
+                      backgroundColor:
+                        booking.status === "Confirmed"
+                          ? "#4caf50"
+                          : booking.status === "Pending"
+                            ? "#ff9800"
+                            : "#f44336",
+                      color: "white",
+                    }}
+                  >
+                    {booking.status}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  {new Date(booking.dateFrom).toLocaleDateString()} <br />
+                  <small>{new Date(booking.dateFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+                </TableCell>
+                <TableCell>
+                  {new Date(booking.dateTo).toLocaleDateString()} <br />
+                  <small>{new Date(booking.dateTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+                </TableCell>
+                <TableCell>
+                  <IconButton
+                    color="primary"
+                    onClick={() => handleOpenDialog(booking)}
+                  >
+                    <Edit />
+                  </IconButton>
+                  <IconButton
+                    color="error"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          `Are you sure you want to delete booking ${booking.bookingId}?`
+                        )
+                      ) {
+                        handleDeleteBooking(booking._id);
+                      }
+                    }}
+                  >
+                    <Delete />
+                  </IconButton>
+                  <IconButton color="primary" onClick={() => handlePrintPDF(booking)}>
+                    <Download />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-          <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-            <DialogTitle>{currentBooking?.bookingId ? "✏️ Edit Booking" : "➕ Add Booking"}</DialogTitle>
-            <DialogContent>
-              <TextField fullWidth margin="dense" label="Customer ID" value={currentBooking?.customerId || ""} onChange={(e) => setCurrentBooking({ ...currentBooking, customerId: e.target.value })} />
-              <TextField fullWidth margin="dense" label="Vehicle ID" value={currentBooking?.vehicleId || ""} onChange={(e) => setCurrentBooking({ ...currentBooking, vehicleId: e.target.value })} />
-              <TextField fullWidth margin="dense" label="Pick-up Location" value={currentBooking?.pickUpLocation || ""} onChange={(e) => setCurrentBooking({ ...currentBooking, pickUpLocation: e.target.value })} />
-              <Select fullWidth value={currentBooking?.status || ""} onChange={(e) => setCurrentBooking({ ...currentBooking, status: e.target.value })}>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>
+          {currentBooking?.bookingId ? "✏️ Edit Booking" : "➕ Add Booking"}
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Customer ID"
+            value={currentBooking?.customerId || ""}
+            onChange={(e) =>
+              setCurrentBooking({ ...currentBooking, customerId: e.target.value })
+            }
+          />
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Vehicle ID"
+            value={currentBooking?.vehicleId || ""}
+            onChange={(e) =>
+              setCurrentBooking({ ...currentBooking, vehicleId: e.target.value })
+            }
+          />
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Pick-up Location"
+            value={currentBooking?.pickUpLocation || ""}
+            onChange={(e) =>
+              setCurrentBooking({ ...currentBooking, pickUpLocation: e.target.value })
+            }
+          />
+          <Select
+            fullWidth
+            value={currentBooking?.status || ""}
+            onChange={(e) =>
+              setCurrentBooking({ ...currentBooking, status: e.target.value })
+            }
+          >
             <MenuItem value="Confirmed">✅ Confirmed</MenuItem>
             <MenuItem value="Pending">⏳ Pending</MenuItem>
             <MenuItem value="Cancelled">❌ Cancelled</MenuItem>
-              </Select>
-              <TextField
+          </Select>
+          <TextField
             fullWidth
             margin="dense"
             label="Date From"
@@ -207,10 +361,118 @@ const BookingDetails = () => {
             variant="contained"
             color="primary"
             onClick={() => {
-              if (currentBooking?.dateFrom && currentBooking?.dateTo && currentBooking.dateTo < currentBooking.dateFrom) {
+              if (
+                currentBooking?.dateFrom &&
+                currentBooking?.dateTo &&
+                currentBooking.dateTo < currentBooking.dateFrom
+              ) {
                 alert("Date To cannot be before Date From.");
               } else {
                 handleSaveBooking();
+                setOpenDialog(false)
+              }
+            }}
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
+        <DialogTitle>
+          {currentBooking?.bookingId ? "➕ Add Booking" : "➕ Add Booking"}
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Customer ID"
+            value={currentBooking?.customerId || ""}
+            onChange={(e) =>
+              setCurrentBooking({ ...currentBooking, customerId: e.target.value })
+            }
+          />
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Vehicle ID"
+            value={currentBooking?.vehicleId || ""}
+            onChange={(e) =>
+              setCurrentBooking({ ...currentBooking, vehicleId: e.target.value })
+            }
+          />
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Pick-up Location"
+            value={currentBooking?.pickUpLocation || ""}
+            onChange={(e) =>
+              setCurrentBooking({ ...currentBooking, pickUpLocation: e.target.value })
+            }
+          />
+          <Select
+            fullWidth
+            value={currentBooking?.status || ""}
+            onChange={(e) =>
+              setCurrentBooking({ ...currentBooking, status: e.target.value })
+            }
+          >
+            <MenuItem value="Confirmed">✅ Confirmed</MenuItem>
+            <MenuItem value="Pending">⏳ Pending</MenuItem>
+            <MenuItem value="Cancelled">❌ Cancelled</MenuItem>
+          </Select>
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Date From"
+            type="datetime-local"
+            InputLabelProps={{ shrink: true }}
+            value={currentBooking?.dateFrom || ""}
+            onChange={(e) => {
+              const selectedDateTime = e.target.value;
+              const now = new Date().toISOString().slice(0, 16); // Format to 'YYYY-MM-DDTHH:MM'
+
+              if (selectedDateTime < now) {
+                alert("Date From cannot be in the past.");
+              } else {
+                setCurrentBooking({ ...currentBooking, dateFrom: selectedDateTime });
+              }
+            }}
+          />
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Date To"
+            type="datetime-local"
+            InputLabelProps={{ shrink: true }}
+            value={currentBooking?.dateTo || ""}
+            onChange={(e) => {
+              const selectedDateTime = e.target.value;
+              const now = new Date().toISOString().slice(0, 16); // Format to 'YYYY-MM-DDTHH:MM'
+
+              if (selectedDateTime < now) {
+                alert("Date From cannot be in the past.");
+              } else {
+                setCurrentBooking({ ...currentBooking, dateTo: selectedDateTime });
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenAddDialog(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              if (
+                currentBooking?.dateFrom &&
+                currentBooking?.dateTo &&
+                currentBooking.dateTo < currentBooking.dateFrom
+              ) {
+                alert("Date To cannot be before Date From.");
+              } else {
+                handleAddBooking();
               }
             }}
           >

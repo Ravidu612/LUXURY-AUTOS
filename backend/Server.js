@@ -29,6 +29,7 @@ app.use('/vehiclebookings', bookingRoutes);
 app.use('/auth', authRoutes);
 app.use('/payments', paymentRoutes); // Prefixing all payment routes with `/payments`
 
+
 // Serve static files (uploaded images)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -40,7 +41,7 @@ app.use((err, req, res, next) => {
 
 // Environment variables and database setup
 const PORT = process.env.PORT || 4000;
-const DB_URL = process.env.DB_URL || 'mongodb+srv://vrms:vrms@itpm.cdjik.mongodb.net/';
+const DB_URL = process.env.DB_URL || 'mongodb+srv://asd:asd@itpm.cdjik.mongodb.net/';
 
 // Connect to MongoDB
 mongoose.connect(DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })

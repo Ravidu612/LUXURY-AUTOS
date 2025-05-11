@@ -15,18 +15,19 @@ import {
     DialogContent,
     DialogActions,
     MenuItem,
+    CardMedia,
 } from "@mui/material";
 
 import Footer from "../Footer/Footer";
 import Header from "../Navbar/Navbar";
-import { Link } from "react-router-dom";
+// Removed unused Link import
 
 const VehiclePage = () => {
     const [vehicles, setVehicles] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [filters, setFilters] = useState({ type: "", fuel: "", transmission: "" });
     const [openViewDialog, setOpenViewDialog] = useState(false);
-    const [editMode, setEditMode] = useState(false);
+    // Removed unused editMode state
     const [selectedVehicle, setSelectedVehicle] = useState(null);
 
     useEffect(() => {
@@ -48,6 +49,23 @@ const VehiclePage = () => {
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleSaveVehicle = async () => {
+        try {
+            if (selectedVehicle._id) {
+                await axios.put(`http://localhost:4000/vehicles/${selectedVehicle._id}`, selectedVehicle);
+                setSnackbarMessage('Vehicles updated successfully!');
+            } else {
+                await axios.post('http://localhost:4000/vehicles', selectedVehicle);
+                setSnackbarMessage('Vehicles added successfully!');
+            }
+            setSnackbarOpen(true);
+            setOpenViewDialog(false);
+            fetchProperties();
+        } catch (error) {
+            console.error('Error saving Vehicle:', error);
+        }
     };
 
     const filteredVehicles = vehicles.filter((vehicle) =>
@@ -112,39 +130,36 @@ const VehiclePage = () => {
             <Grid container spacing={3} justifyContent="center">
                 {filteredVehicles.map((vehicle) => (
                     <Grid item xs={12} sm={6} md={4} key={vehicle.vehicleId}>
-                            <Card sx={{ cursor: "pointer", height: "100%" }} onClick={() => { setOpenViewDialog(true); setSelectedVehicle(property); }}>
-                                <img
-                                    src={vehicle.image}
-                                    alt={vehicle.name}
-                                    style={{ width: "100%", height: 200, objectFit: "cover" }}
-                                />
-                                <CardContent>
-                                    <Typography variant="h6">{vehicle.name}</Typography>
-                                    <Typography color="textSecondary">{vehicle.type}</Typography>
-                                    <Typography variant="body2">Fuel: {vehicle.fuel}</Typography>
-                                    <Typography variant="body2">Seats: {vehicle.seats}</Typography>
-                                    <Typography variant="body2">Transmission: {vehicle.transmission}</Typography>
-                                    <Typography variant="body2">Price: ${vehicle.price}</Typography>
-                                    <Typography variant="body2">Status: {vehicle.status}</Typography>
-                                </CardContent>
+                        <Card sx={{ cursor: "pointer", height: "100%" }} onClick={() => { setOpenViewDialog(true); setSelectedVehicle(vehicle); }}>
+                            <img
+                                src={vehicle.image}
+                                alt={vehicle.name}
+                                style={{ width: "100%", height: 200, objectFit: "cover" }}
+                            />
+                            <CardContent>
+                                <Typography variant="h6">{vehicle.name}</Typography>
+                                <Typography color="textSecondary">{vehicle.type}</Typography>
+                                <Typography variant="body2">Fuel: {vehicle.fuel}</Typography>
+                                <Typography variant="body2">Seats: {vehicle.seats}</Typography>
+                                <Typography variant="body2">Transmission: {vehicle.transmission}</Typography>
+                                <Typography variant="body2">Price: ${vehicle.price}</Typography>
+                                <Typography variant="body2">Status: {vehicle.status}</Typography>
                                 <Button
                                     variant="contained"
                                     color="primary"
-                                    onClick={(e) => {
-                                        e.stopPropagation(); // Prevent triggering the card click event
-                                        setEditMode(true);
-                                        setSelectedVehicle(vehicle);
-                                        setOpenViewDialog(true);
-                                    }}
-                                    sx={{ margin: 2 }}  ></Button>
-
-                            </Card>
+                                    onClick={() => { setOpenViewDialog(true); setSelectedVehicle(vehicle); }}
+                                    sx={{ marginTop: 1 }}
+                                >
+                                    Book Now
+                                </Button>
+                            </CardContent>
+                        </Card>
                     </Grid>
                 ))}
             </Grid>
 
             <Dialog open={openViewDialog} onClose={() => setOpenViewDialog(false)}>
-                <DialogTitle>{editMode ? 'Property Details' : 'Add Property'}</DialogTitle>
+                <DialogTitle>{selectedVehicle ? 'Booking Details' : 'Add Vehicle'}</DialogTitle>
                 <DialogContent>
                     {selectedVehicle && (
                         <>
@@ -153,32 +168,88 @@ const VehiclePage = () => {
                             </Typography>
                             <CardMedia
                                 component="img"
-                                style={{ width: '100px', height: '100px', objectFit: 'cover', marginTop: '10px', borderRadius: '8px' }}
-                                image={selectedVehicle.image || 'default-image-path'}
+                                style={{ width: '200px', height: '100px', objectFit: 'cover', marginTop: '10px', borderRadius: '8px' }}
+                                image={selectedVehicle.image}
                                 alt={selectedVehicle.name}
                             />
                             <Typography variant="subtitle1" gutterBottom>
-                                Type: {selectedVehicle.type}
+                                Select Pickup Location:
                             </Typography>
+                            <div style={{ height: '300px', width: '100%' }}>
+                                <iframe
+                                    title="Map"
+                                    src={`https://www.google.com/maps?q=${selectedVehicle.location || "WX7F+V5+Malabe,+Sri+Lanka"}&output=embed`}
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 0 }}
+                                    allowFullScreen=""
+                                    loading="lazy"
+                                ></iframe>
+                            </div>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={() => {
+                                    navigator.geolocation.getCurrentPosition(
+                                        (position) => {
+                                            const location = `${position.coords.latitude},${position.coords.longitude}`;
+                                            setSelectedVehicle((prev) => ({ ...prev, location }));
+                                        },
+                                        (error) => {
+                                            console.error("Error fetching location:", error);
+                                        }
+                                    );
+                                }}
+                                sx={{ marginTop: 2 }}
+                            >
+                                Use My Location
+                            </Button>
+                            <TextField
+                                label="Pickup Location"
+                                value={selectedVehicle.location || ""}
+                                onChange={(e) => setSelectedVehicle({ ...selectedVehicle, location: e.target.value })}
+                                fullWidth
+                                margin="normal"
+                            />
 
-                            <Typography variant="subtitle1" gutterBottom>
-                                Fuel: {selectedVehicle.fuel}
-                            </Typography>
-
-                            <Typography variant="subtitle1" gutterBottom>
-                                Price: ${selectedVehicle.price}
-                            </Typography>
+                            <TextField
+                                fullWidth
+                                label="Start Date"
+                                type="date"
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                inputProps={{
+                                    min: new Date().toISOString().split("T")[0],
+                                }}
+                                onChange={(e) => console.log("Selected Start Date:", e.target.value)}
+                            />
+                            <br /><br />
+                            <TextField
+                                fullWidth
+                                label="End Date"
+                                type="date"
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                inputProps={{
+                                    min: new Date().toISOString().split("T")[0],
+                                }}
+                                onChange={(e) => console.log("Selected End Date:", e.target.value)}
+                            />
 
                             <Typography variant="subtitle1" gutterBottom>
                                 Status: {selectedVehicle.status}
                             </Typography>
-
                         </>
                     )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenViewDialog(false)} color="secondary">
                         Close
+                    </Button>
+                    <Button onClick={handleSaveVehicle} color="primary">
+                        Save
                     </Button>
                 </DialogActions>
             </Dialog>
