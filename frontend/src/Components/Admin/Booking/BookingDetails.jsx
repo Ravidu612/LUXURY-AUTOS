@@ -48,21 +48,36 @@ const BookingDetails = () => {
     setOpenAddDialog(true);
   };
 
+  const handleOpenDialog = (booking = null) => {
+    setCurrentBooking(
+      booking || {
+        bookingId: `B00${bookings.length + 1}`,
+        customerId: "",
+        vehicleId: "",
+        pickUpLocation: "",
+        status: "",
+        dateFrom: "",
+        dateTo: "",
+      }
+    );
+    setOpenDialog(true);
+  };
+
   const handleSaveBooking = async () => {
-    try {      
-        // Update existing booking
-        const response = await fetch(
-          `http://localhost:4000/vehiclebookings/${currentBooking._id}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(currentBooking),
-          }
-        );
-        if (!response.ok) {
-          throw new Error("Failed to update booking");
+    try {
+      // Update existing booking
+      const response = await fetch(
+        `http://localhost:4000/vehiclebookings/${currentBooking._id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(currentBooking),
         }
-      
+      );
+      if (!response.ok) {
+        throw new Error("Failed to update booking");
+      }
+
       fetchBookings();
       setOpenAddDialog(false);
     } catch (error) {
@@ -82,7 +97,7 @@ const BookingDetails = () => {
         if (!response.ok) {
           throw new Error("Failed to create booking");
         }
-      } 
+      }
       fetchBookings();
       setOpenAddDialog(false);
     } catch (error) {
@@ -216,20 +231,26 @@ const BookingDetails = () => {
                         booking.status === "Confirmed"
                           ? "#4caf50"
                           : booking.status === "Pending"
-                          ? "#ff9800"
-                          : "#f44336",
+                            ? "#ff9800"
+                            : "#f44336",
                       color: "white",
                     }}
                   >
                     {booking.status}
                   </span>
                 </TableCell>
-                <TableCell>{booking.dateFrom}</TableCell>
-                <TableCell>{booking.dateTo}</TableCell>
+                <TableCell>
+                  {new Date(booking.dateFrom).toLocaleDateString()} <br />
+                  <small>{new Date(booking.dateFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+                </TableCell>
+                <TableCell>
+                  {new Date(booking.dateTo).toLocaleDateString()} <br />
+                  <small>{new Date(booking.dateTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+                </TableCell>
                 <TableCell>
                   <IconButton
                     color="primary"
-                    onClick={() => handleOpenAddDialog(booking)}
+                    onClick={() => handleOpenDialog(booking)}
                   >
                     <Edit />
                   </IconButton>
@@ -348,6 +369,7 @@ const BookingDetails = () => {
                 alert("Date To cannot be before Date From.");
               } else {
                 handleSaveBooking();
+                setOpenDialog(false)
               }
             }}
           >
@@ -355,7 +377,7 @@ const BookingDetails = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      
+
       <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
         <DialogTitle>
           {currentBooking?.bookingId ? "➕ Add Booking" : "➕ Add Booking"}
@@ -403,38 +425,42 @@ const BookingDetails = () => {
             fullWidth
             margin="dense"
             label="Date From"
-            type="date"
+            type="datetime-local"
             InputLabelProps={{ shrink: true }}
             value={currentBooking?.dateFrom || ""}
             onChange={(e) => {
-              const selectedDate = e.target.value;
-              const today = new Date().toISOString().split("T")[0];
-              if (selectedDate < today) {
+              const selectedDateTime = e.target.value;
+              const now = new Date().toISOString().slice(0, 16); // Format to 'YYYY-MM-DDTHH:MM'
+
+              if (selectedDateTime < now) {
                 alert("Date From cannot be in the past.");
               } else {
-                setCurrentBooking({ ...currentBooking, dateFrom: selectedDate });
+                setCurrentBooking({ ...currentBooking, dateFrom: selectedDateTime });
               }
             }}
           />
+
           <TextField
             fullWidth
             margin="dense"
             label="Date To"
-            type="date"
+            type="datetime-local"
             InputLabelProps={{ shrink: true }}
             value={currentBooking?.dateTo || ""}
             onChange={(e) => {
-              const selectedDate = e.target.value;
-              if (currentBooking?.dateFrom && selectedDate < currentBooking.dateFrom) {
-                alert("Date To cannot be before Date From.");
+              const selectedDateTime = e.target.value;
+              const now = new Date().toISOString().slice(0, 16); // Format to 'YYYY-MM-DDTHH:MM'
+
+              if (selectedDateTime < now) {
+                alert("Date From cannot be in the past.");
               } else {
-                setCurrentBooking({ ...currentBooking, dateTo: selectedDate });
+                setCurrentBooking({ ...currentBooking, dateTo: selectedDateTime });
               }
             }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+          <Button onClick={() => setOpenAddDialog(false)}>Cancel</Button>
           <Button
             variant="contained"
             color="primary"
