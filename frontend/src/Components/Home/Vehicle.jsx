@@ -24,11 +24,10 @@ import Header from "../Navbar/Navbar";
 
 const VehiclePage = () => {
     const [vehicles, setVehicles] = useState([]);
-    // Removed unused bookings state
+    const [bookings, setBookings] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [filters, setFilters] = useState({ type: "", fuel: "", transmission: "" });
     const [openViewDialog, setOpenViewDialog] = useState(false);
-    // Removed unused editMode state
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [currentBooking, setCurrentBooking] = useState(null);
 
@@ -90,6 +89,15 @@ const VehiclePage = () => {
             console.error("Error saving booking:", error);
         }
     };
+
+    useEffect(() => {
+        if (selectedVehicle && !currentBooking?.vehicleId) {
+            setCurrentBooking((prev) => ({
+                ...prev,
+                vehicleId: selectedVehicle.vehicleId,
+            }));
+        }
+    }, [selectedVehicle, currentBooking]);
 
 
     const filteredVehicles = vehicles.filter((vehicle) =>
@@ -186,6 +194,8 @@ const VehiclePage = () => {
                 <DialogTitle>
                     {currentBooking?.bookingId ? "➕ Add Booking" : "➕ Add Booking"}
                 </DialogTitle>
+                <Typography variant="h6"> Vehicle : {selectedVehicle?.name}</Typography>
+
                 <CardMedia
                     component="img"
                     style={{ width: '200px', height: '100px', objectFit: 'cover', marginTop: '10px', borderRadius: '8px' }}
@@ -206,12 +216,22 @@ const VehiclePage = () => {
                         fullWidth
                         margin="dense"
                         label="Vehicle ID"
-                        value={currentBooking?.vehicleId || selectedVehicle.vehicleId || ""}
+                        value={currentBooking?.vehicleId || ''}
                         onChange={(e) =>
                             setCurrentBooking({ ...currentBooking, vehicleId: e.target.value })
                         }
                     />
-
+                    <div style={{ height: '300px', width: '100%' }}>
+                        <iframe
+                            title="Map"
+                            src={`https://www.google.com/maps?q=${selectedVehicle?.location || "WX7F+V5+Malabe,+Sri+Lanka"}&output=embed`}
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            allowFullScreen=""
+                            loading="lazy"
+                        ></iframe>
+                    </div>
                     <Button
                         variant="contained"
                         color="primary"
@@ -300,11 +320,32 @@ const VehiclePage = () => {
                                 alert("Date To cannot be before Date From.");
                             } else {
                                 handleAddBooking();
-                                console.log("Booking saved:", currentBooking);
+                                console.log("Booking Confirmed:", currentBooking);
+                                setCurrentBooking((prev) => ({ ...prev, submitted: true }));
                             }
                         }}
                     >
                         Save
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog
+                open={!!currentBooking?.submitted}
+                onClose={() => setCurrentBooking((prev) => ({ ...prev, submitted: false }))}
+            >
+                <DialogTitle>Booking Submitted</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Your booking has been submitted for review. We will get back to you shortly.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={() => setCurrentBooking((prev) => ({ ...prev, submitted: false }))}
+                        color="primary"
+                    >
+                        OK
                     </Button>
                 </DialogActions>
             </Dialog>
