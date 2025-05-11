@@ -24,11 +24,14 @@ import Header from "../Navbar/Navbar";
 
 const VehiclePage = () => {
     const [vehicles, setVehicles] = useState([]);
+    // Removed unused bookings state
     const [searchQuery, setSearchQuery] = useState("");
     const [filters, setFilters] = useState({ type: "", fuel: "", transmission: "" });
     const [openViewDialog, setOpenViewDialog] = useState(false);
     // Removed unused editMode state
     const [selectedVehicle, setSelectedVehicle] = useState(null);
+    const [currentBooking, setCurrentBooking] = useState(null);
+
 
     useEffect(() => {
         const fetchVehicles = async () => {
@@ -51,22 +54,43 @@ const VehiclePage = () => {
         setFilters((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSaveVehicle = async () => {
+    const fetchBookings = async () => {
         try {
-            if (selectedVehicle._id) {
-                await axios.put(`http://localhost:4000/vehicles/${selectedVehicle._id}`, selectedVehicle);
-                setSnackbarMessage('Vehicles updated successfully!');
-            } else {
-                await axios.post('http://localhost:4000/vehicles', selectedVehicle);
-                setSnackbarMessage('Vehicles added successfully!');
+            const response = await fetch("http://localhost:4000/vehiclebookings");
+            if (!response.ok) {
+                throw new Error("Failed to fetch bookings");
             }
-            setSnackbarOpen(true);
-            setOpenViewDialog(false);
-            fetchProperties();
+            const data = await response.json();
+            setBookings(data);
         } catch (error) {
-            console.error('Error saving Vehicle:', error);
+            console.error("Error fetching bookings:", error);
         }
     };
+
+    const handleAddBooking = async () => {
+        try {
+            const newBooking = {
+                ...currentBooking,
+                bookingId: `B00${Math.floor(Math.random() * 10000)}`,
+            };
+
+            const response = await fetch("http://localhost:4000/vehiclebookings", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newBooking),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to create booking");
+            }
+
+            fetchBookings();
+            setOpenViewDialog(false);
+        } catch (error) {
+            console.error("Error saving booking:", error);
+        }
+    };
+
 
     const filteredVehicles = vehicles.filter((vehicle) =>
         vehicle.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -159,96 +183,127 @@ const VehiclePage = () => {
             </Grid>
 
             <Dialog open={openViewDialog} onClose={() => setOpenViewDialog(false)}>
-                <DialogTitle>{selectedVehicle ? 'Booking Details' : 'Add Vehicle'}</DialogTitle>
+                <DialogTitle>
+                    {currentBooking?.bookingId ? "➕ Add Booking" : "➕ Add Booking"}
+                </DialogTitle>
+                <CardMedia
+                    component="img"
+                    style={{ width: '200px', height: '100px', objectFit: 'cover', marginTop: '10px', borderRadius: '8px' }}
+                    image={selectedVehicle?.image || ""}
+                    alt={selectedVehicle?.name || "Vehicle"}
+                />
                 <DialogContent>
-                    {selectedVehicle && (
-                        <>
-                            <Typography variant="subtitle1" gutterBottom>
-                                Name: {selectedVehicle.name}
-                            </Typography>
-                            <CardMedia
-                                component="img"
-                                style={{ width: '200px', height: '100px', objectFit: 'cover', marginTop: '10px', borderRadius: '8px' }}
-                                image={selectedVehicle.image}
-                                alt={selectedVehicle.name}
-                            />
-                            <Typography variant="subtitle1" gutterBottom>
-                                Select Pickup Location:
-                            </Typography>
-                            <div style={{ height: '300px', width: '100%' }}>
-                                <iframe
-                                    title="Map"
-                                    src={`https://www.google.com/maps?q=${selectedVehicle.location || "WX7F+V5+Malabe,+Sri+Lanka"}&output=embed`}
-                                    width="100%"
-                                    height="100%"
-                                    style={{ border: 0 }}
-                                    allowFullScreen=""
-                                    loading="lazy"
-                                ></iframe>
-                            </div>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={() => {
-                                    navigator.geolocation.getCurrentPosition(
-                                        (position) => {
-                                            const location = `${position.coords.latitude},${position.coords.longitude}`;
-                                            setSelectedVehicle((prev) => ({ ...prev, location }));
-                                        },
-                                        (error) => {
-                                            console.error("Error fetching location:", error);
-                                        }
-                                    );
-                                }}
-                                sx={{ marginTop: 2 }}
-                            >
-                                Use My Location
-                            </Button>
-                            <TextField
-                                label="Pickup Location"
-                                value={selectedVehicle.location || ""}
-                                onChange={(e) => setSelectedVehicle({ ...selectedVehicle, location: e.target.value })}
-                                fullWidth
-                                margin="normal"
-                            />
+                    <TextField
+                        fullWidth
+                        margin="dense"
+                        label="Customer Name"
+                        value={currentBooking?.customerId || ""}
+                        onChange={(e) =>
+                            setCurrentBooking({ ...currentBooking, customerId: e.target.value })
+                        }
+                    />
+                    <TextField
+                        fullWidth
+                        margin="dense"
+                        label="Vehicle ID"
+                        value={currentBooking?.vehicleId || selectedVehicle.vehicleId || ""}
+                        onChange={(e) =>
+                            setCurrentBooking({ ...currentBooking, vehicleId: e.target.value })
+                        }
+                    />
 
-                            <TextField
-                                fullWidth
-                                label="Start Date"
-                                type="date"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                inputProps={{
-                                    min: new Date().toISOString().split("T")[0],
-                                }}
-                                onChange={(e) => console.log("Selected Start Date:", e.target.value)}
-                            />
-                            <br /><br />
-                            <TextField
-                                fullWidth
-                                label="End Date"
-                                type="date"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                inputProps={{
-                                    min: new Date().toISOString().split("T")[0],
-                                }}
-                                onChange={(e) => console.log("Selected End Date:", e.target.value)}
-                            />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => {
+                            navigator.geolocation.getCurrentPosition(
+                                (position) => {
+                                    const location = `${position.coords.latitude},${position.coords.longitude}`;
+                                    setCurrentBooking((prev) => ({ ...prev, pickUpLocation: location }));
+                                },
+                                (error) => {
+                                    console.error("Error fetching location:", error);
+                                }
+                            );
+                        }}
+                        sx={{ marginTop: 2 }}
+                    >
+                        Use My Location
+                    </Button>
+                    <TextField
+                        fullWidth
+                        margin="dense"
+                        label="Pick-up Location"
+                        value={currentBooking?.pickUpLocation || ""}
+                        onChange={(e) =>
+                            setCurrentBooking({ ...currentBooking, pickUpLocation: e.target.value })
+                        }
+                    />
+                    <Select
+                        fullWidth
+                        value={currentBooking?.status || ""}
+                        onChange={(e) =>
+                            setCurrentBooking({ ...currentBooking, status: e.target.value })
+                        }
+                    >
+                        <MenuItem value="Pending">⏳ Pending</MenuItem>
+                    </Select>
+                    <TextField
+                        fullWidth
+                        margin="dense"
+                        label="Date From"
+                        type="datetime-local"
+                        InputLabelProps={{ shrink: true }}
+                        value={currentBooking?.dateFrom || ""}
+                        onChange={(e) => {
+                            const selectedDateTime = e.target.value;
+                            const now = new Date().toISOString().slice(0, 16); // Format to 'YYYY-MM-DDTHH:MM'
 
-                            <Typography variant="subtitle1" gutterBottom>
-                                Status: {selectedVehicle.status}
-                            </Typography>
-                        </>
-                    )}
+                            if (selectedDateTime < now) {
+                                alert("Date From cannot be in the past.");
+                            } else {
+                                setCurrentBooking({ ...currentBooking, dateFrom: selectedDateTime });
+                            }
+                        }}
+                    />
+
+                    <TextField
+                        fullWidth
+                        margin="dense"
+                        label="Date To"
+                        type="datetime-local"
+                        InputLabelProps={{ shrink: true }}
+                        value={currentBooking?.dateTo || ""}
+                        onChange={(e) => {
+                            const selectedDateTime = e.target.value;
+                            const now = new Date().toISOString().slice(0, 16); // Format to 'YYYY-MM-DDTHH:MM'
+
+                            if (selectedDateTime < now) {
+                                alert("Date From cannot be in the past.");
+                            } else {
+                                setCurrentBooking({ ...currentBooking, dateTo: selectedDateTime });
+                            }
+                        }}
+                    />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenViewDialog(false)} color="secondary">
-                        Close
-                    </Button>
-                    <Button onClick={handleSaveVehicle} color="primary">
+                    <Button onClick={() => setOpenViewDialog(false)}>Cancel</Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => {
+                            if (
+                                currentBooking?.dateFrom &&
+                                currentBooking?.dateTo &&
+                                currentBooking.dateTo < currentBooking.dateFrom
+                            ) {
+                                alert("Date To cannot be before Date From.");
+                            } else {
+                                handleAddBooking();
+                                console.log("Booking saved:", currentBooking);
+                            }
+                        }}
+                    >
                         Save
                     </Button>
                 </DialogActions>
