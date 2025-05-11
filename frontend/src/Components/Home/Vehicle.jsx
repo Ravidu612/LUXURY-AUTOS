@@ -127,6 +127,17 @@ const VehiclePage = () => {
                                     <Typography variant="body2">Price: ${vehicle.price}</Typography>
                                     <Typography variant="body2">Status: {vehicle.status}</Typography>
                                 </CardContent>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // Prevent triggering the card click event
+                                        setEditMode(true);
+                                        setSelectedVehicle(vehicle);
+                                        setOpenViewDialog(true);
+                                    }}
+                                    sx={{ margin: 2 }}  ></Button>
+
                             </Card>
                     </Grid>
                 ))}
@@ -138,28 +149,28 @@ const VehiclePage = () => {
                     {selectedVehicle && (
                         <>
                             <Typography variant="subtitle1" gutterBottom>
-                                Name:{selectedProperty.name}
+                                Name: {selectedVehicle.name}
                             </Typography>
                             <CardMedia
                                 component="img"
                                 style={{ width: '100px', height: '100px', objectFit: 'cover', marginTop: '10px', borderRadius: '8px' }}
-                                image={selectedProperty.images?.[0] || 'default-image-path'}
-                                alt={selectedProperty.name}
+                                image={selectedVehicle.image || 'default-image-path'}
+                                alt={selectedVehicle.name}
                             />
                             <Typography variant="subtitle1" gutterBottom>
-                                Size:{selectedProperty.size}
+                                Type: {selectedVehicle.type}
                             </Typography>
 
                             <Typography variant="subtitle1" gutterBottom>
-                                Address:{selectedProperty.address}
+                                Fuel: {selectedVehicle.fuel}
                             </Typography>
 
                             <Typography variant="subtitle1" gutterBottom>
-                                Price:{selectedProperty.price}
+                                Price: ${selectedVehicle.price}
                             </Typography>
 
                             <Typography variant="subtitle1" gutterBottom>
-                                Status:{selectedProperty.status}
+                                Status: {selectedVehicle.status}
                             </Typography>
 
                         </>
