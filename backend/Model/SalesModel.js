@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 
 const SaleSchema = new mongoose.Schema({
-    vehicleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Vehicle', required: true },
-    customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true },
-    rentalPeriod: { type: Number, required: true }, // Number of days rented
-    totalAmount: { type: Number, required: true },
-    paymentStatus: { type: String, enum: ['Pending', 'Paid', 'Refunded'], required: true },
+    saleId: { type: String }, 
+    vehicleId: { type: String },
+    rentalPeriod: { type: String, required: true },
+    totalAmount: { type: String, required: true },
+    paymentStatus: { type: String, enum: ['Pending', 'Confirmed', 'Cancelled'], required: true },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Sale', SaleSchema);

@@ -1,85 +1,100 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
   Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField,
   Select, MenuItem, InputAdornment, IconButton, Typography
 } from "@mui/material";
 import { Add, Edit, Delete, Download, Search } from "@mui/icons-material";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
 
 const RentalList = () => {
-  const [rentals, setRentals] = useState([
-    { rentId: "R001", vehicleId: "V456", type: "car", days: "3", status: "Confirmed" },
-    { rentId: "R002", vehicleId: "V654", type: "van", days: "5", status: "Pending" },
-    { rentId: "R003", vehicleId: "V987", type: "bike", days: "7", status: "Confirmed" },
-  ]);
-
+  const [sales, setSales] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
-  const [openDialog, setOpenDialog] = useState(false);
-  const [currentRental, setCurrentRental] = useState(null);
-  const [errors, setErrors] = useState({}); // State for validation errors
+  const [filterpaymentStatus, setFilterpaymentStatus] = useState("");
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedSale, setSelectedSale] = useState(null);
+  const [newPaymentStatus, setNewPaymentStatus] = useState("");
 
-  const handleOpenDialog = (rental = null) => {
-    setCurrentRental(rental || { rentId: `R00${rentals.length + 1}`, type: "", vehicleId: "", days: "", status: "" });
-    setErrors({}); // Reset errors when opening the dialog
-    setOpenDialog(true);
+  useEffect(() => {
+    fetchSales();
+  }, []);
+
+  const fetchSales = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/sales");
+      if (!response.ok) {
+        throw new Error("Failed to fetch sales data");
+      }
+      const data = await response.json();
+      setSales(data);
+    } catch (error) {
+      console.error("Error fetching sales data:", error);
+    }
   };
 
-  const validateFields = () => {
-    const newErrors = {};
-    if (!currentRental.vehicleId) newErrors.vehicleId = "Vehicle ID is required.";
-    if (!currentRental.days || currentRental.days <= 0) newErrors.days = "Days must be greater than 0.";
-    if (!currentRental.type) newErrors.type = "Type is required.";
-    if (!currentRental.status) newErrors.status = "Status is required.";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // Return true if no errors
+  const handleDeleteRental = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:4000/sales/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete rental");
+      }
+      setSales(sales.filter((sale) => sale._id !== id));
+    } catch (error) {
+      console.error("Error deleting rental:", error);
+    }
   };
 
-  const handleSaveRental = () => {
-    if (!validateFields()) return; // Stop if validation fails
-
-    setRentals((prev) => {
-      const exists = prev.find((r) => r.rentId === currentRental.rentId);
-      return exists ? prev.map((r) => (r.rentId === currentRental.rentId ? currentRental : r)) : [...prev, currentRental];
-    });
-    setOpenDialog(false);
+  const handleOpenEditDialog = (sale) => {
+    setSelectedSale(sale);
+    setNewPaymentStatus(sale.paymentStatus);
+    setEditDialogOpen(true);
   };
 
-  const filteredRentals = rentals.filter((rental) => {
+  const handleCloseEditDialog = () => {
+    setEditDialogOpen(false);
+    setSelectedSale(null);
+    setNewPaymentStatus("");
+  };
+
+  const handleUpdatePaymentStatus = async () => {
+    try {
+      const response = await fetch(`http://localhost:4000/sales/${selectedSale._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ paymentStatus: newPaymentStatus }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update payment status");
+      }
+      const updatedSale = await response.json();
+      setSales(sales.map((sale) => (sale._id === updatedSale._id ? updatedSale : sale)));
+      handleCloseEditDialog();
+    } catch (error) {
+      console.error("Error updating payment status:", error);
+    }
+  };
+
+  const filteredSales = sales.filter((sale) => {
     const searchLower = searchQuery.toLowerCase();
     return (
-      (rental.type.toLowerCase().includes(searchLower) ||
-        rental.vehicleId.toLowerCase().includes(searchLower)) &&
-      (filterStatus === "" || rental.status === filterStatus)
+      (sale.saleId.toLowerCase().includes(searchLower) ||
+        sale.vehicleId.toLowerCase().includes(searchLower)) &&
+      (filterpaymentStatus === "" || sale.paymentStatus === filterpaymentStatus)
     );
   });
 
-  const handlePrintPDF = () => {
-    const doc = new jsPDF();
-    doc.text("Rental Details", 14, 10);
-    doc.autoTable({
-      head: [["Rental ID", "Vehicle ID", "Days", "Type", "Price", "Status"]],
-      body: rentals.map((rental) => [
-        rental.rentId,
-        rental.vehicleId,
-        rental.days,
-        rental.type,
-        rental.days * (rental.type === "car" ? 15000 : rental.type === "bike" ? 5000 : 25000),
-        rental.status,
-      ]),
-    });
-    doc.save("rental_details.pdf");
-  };
-
   return (
     <div style={{ padding: "24px", backgroundColor: "#f4f6f8", minHeight: "100vh" }}>
-      <Typography variant="h4" fontWeight="bold" gutterBottom>🚗 Rental Management</Typography>
+      <Typography variant="h4" fontWeight="bold" gutterBottom>
+        🚗 Rental Management
+      </Typography>
 
       <div style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
         <TextField
-          label="Search Type/Vehicle"
+          label="Search Rental"
           variant="outlined"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -92,12 +107,18 @@ const RentalList = () => {
           }}
           style={{ flex: "1" }}
         />
-        <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} displayEmpty variant="outlined" style={{ minWidth: "150px" }}>
-          <MenuItem value="">All Statuses</MenuItem>
+        <Select
+          value={filterpaymentStatus}
+          onChange={(e) => setFilterpaymentStatus(e.target.value)}
+          displayEmpty
+          variant="outlined"
+          style={{ minWidth: "150px" }}
+        >
+          <MenuItem value="">All payment statuses</MenuItem>
           <MenuItem value="Confirmed">✅ Confirmed</MenuItem>
           <MenuItem value="Pending">⏳ Pending</MenuItem>
+          <MenuItem value="Cancelled">❌ Cancelled</MenuItem>
         </Select>
-        <Button variant="contained" color="primary" startIcon={<Add />} onClick={() => handleOpenDialog()}>Add Rental</Button>
       </div>
 
       <TableContainer component={Paper} elevation={3}>
@@ -106,48 +127,38 @@ const RentalList = () => {
             <TableRow style={{ backgroundColor: "#eeeeee" }}>
               <TableCell><b>Rental ID</b></TableCell>
               <TableCell><b>Vehicle ID</b></TableCell>
-              <TableCell><b>Type</b></TableCell>
-              <TableCell><b>Days</b></TableCell>
-              <TableCell><b>Price</b></TableCell>
-              <TableCell><b>Status</b></TableCell>
+              <TableCell><b>Rental Period</b></TableCell>
+              <TableCell><b>Total Amount</b></TableCell>
+              <TableCell><b>Payment Status</b></TableCell>
               <TableCell><b>Actions</b></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredRentals.map((rental) => (
-              <TableRow key={rental.rentId} hover>
-                <TableCell>{rental.rentId}</TableCell>
-                <TableCell>{rental.vehicleId}</TableCell>
-                <TableCell>{rental.type}</TableCell>
-                <TableCell>{rental.days}</TableCell>
-                <TableCell>
-                  {rental.type === "car" && rental.days * 15000}
-                  {rental.type === "bike" && rental.days * 5000}
-                  {rental.type === "van" && rental.days * 25000}
-                </TableCell>
+            {filteredSales.map((sale) => (
+              <TableRow key={sale._id} hover>
+                <TableCell>{sale.saleId}</TableCell>
+                <TableCell>{sale.vehicleId}</TableCell>
+                <TableCell>{`${sale.rentalPeriod} days`}</TableCell>
+                <TableCell>{sale.totalAmount}</TableCell>
                 <TableCell>
                   <span style={{
                     padding: "4px 8px",
                     borderRadius: "4px",
-                    backgroundColor: rental.status === "Confirmed" ? "#4caf50" : "#ff9800",
+                    backgroundColor:
+                      sale.paymentStatus === "Confirmed"
+                        ? "#4caf50"
+                        : sale.paymentStatus === "Pending"
+                          ? "#ff9800"
+                          : "#f44336",
                     color: "white",
                   }}>
-                    {rental.status}
+                    {sale.paymentStatus}
                   </span>
                 </TableCell>
                 <TableCell>
-                  <IconButton color="primary" onClick={() => handleOpenDialog(rental)}><Edit /></IconButton>
-                  <IconButton
-                    color="error"
-                    onClick={() => {
-                      if (window.confirm(`Are you sure you want to delete rental ${rental.rentId}?`)) {
-                        setRentals(rentals.filter((r) => r.rentId !== rental.rentId));
-                      }
-                    }}
-                  >
-                    <Delete />
-                  </IconButton>
-                  <IconButton color="primary" onClick={() => handlePrintPDF(rental)}><Download /></IconButton>
+                  <IconButton color="primary" onClick={() => handleOpenEditDialog(sale)}><Edit /></IconButton>
+                  <IconButton color="error" onClick={() => handleDeleteRental(sale._id)}><Delete /></IconButton>
+                  <IconButton color="primary"><Download /></IconButton>
                 </TableCell>
               </TableRow>
             ))}
@@ -155,58 +166,22 @@ const RentalList = () => {
         </Table>
       </TableContainer>
 
-      {/* Add/Edit Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>{currentRental?.rentId ? "✏️ Edit Rental" : "➕ Add Rental"}</DialogTitle>
+      <Dialog open={editDialogOpen} onClose={handleCloseEditDialog}>
+        <DialogTitle>Edit Payment Status</DialogTitle>
         <DialogContent>
-          Input Vehicle ID
-          <TextField
-            fullWidth
-            margin="dense"
-            value={currentRental?.vehicleId || ""}
-            onChange={(e) => setCurrentRental({ ...currentRental, vehicleId: e.target.value })}
-            error={!!errors.vehicleId}
-            helperText={errors.vehicleId}
-          />
-          Input Days
-          <TextField
-            fullWidth
-            margin="dense"
-            type="number"
-            value={currentRental?.days || ""}
-            onChange={(e) => setCurrentRental({ ...currentRental, days: e.target.value })}
-            error={!!errors.days}
-            helperText={errors.days}
-          />
-          Select Status
           <Select
+            value={newPaymentStatus}
+            onChange={(e) => setNewPaymentStatus(e.target.value)}
             fullWidth
-            margin="dense"
-            value={currentRental?.status || ""}
-            onChange={(e) => setCurrentRental({ ...currentRental, status: e.target.value })}
-            error={!!errors.status}
           >
             <MenuItem value="Confirmed">✅ Confirmed</MenuItem>
             <MenuItem value="Pending">⏳ Pending</MenuItem>
+            <MenuItem value="Cancelled">❌ Cancelled</MenuItem>
           </Select>
-          {errors.status && <Typography color="error">{errors.status}</Typography>}
-          Select Type
-          <Select
-            fullWidth
-            margin="dense"
-            value={currentRental?.type || ""}
-            onChange={(e) => setCurrentRental({ ...currentRental, type: e.target.value })}
-            error={!!errors.type}
-          >
-            <MenuItem value="car">Car</MenuItem>
-            <MenuItem value="van">Van</MenuItem>
-            <MenuItem value="bike">Bike</MenuItem>
-          </Select>
-          {errors.type && <Typography color="error">{errors.type}</Typography>}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button variant="contained" color="primary" onClick={handleSaveRental}>Save</Button>
+          <Button onClick={handleCloseEditDialog} color="secondary">Cancel</Button>
+          <Button onClick={handleUpdatePaymentStatus} color="primary">Save</Button>
         </DialogActions>
       </Dialog>
     </div>

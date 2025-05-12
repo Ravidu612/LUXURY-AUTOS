@@ -14,6 +14,7 @@ const customerRoutes = require('./Routes/CustomerRoutes');
 const bookingRoutes = require('./Routes/BookingRoutes');
 const promotionRoutes = require('./Routes/PromotionRoutes');
 const authRoutes = require('./Routes/AuthRoutes');
+const salesRoutes = require('./Routes/SalesRoutes'); 
 
 // Middleware
 app.use(express.json());
@@ -28,6 +29,7 @@ app.use('/promotions', promotionRoutes);  // Prefix for promotion routes
 app.use('/vehiclebookings', bookingRoutes);
 app.use('/auth', authRoutes);
 app.use('/payments', paymentRoutes); // Prefixing all payment routes with `/payments`
+app.use('/sales', salesRoutes); // Prefix for sales routes
 
 
 // Serve static files (uploaded images)

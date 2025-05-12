@@ -1,65 +1,155 @@
-const Sale = require('../models/Sale');
+const VehicleSale = require('../Model/SalesModel');
+const mongoose = require('mongoose');
 
-// Create a new sale
+// Generate Sale ID with leading zeros
+const generateSaleId = async () => {
+    const lastSale = await VehicleSale.findOne().sort({ saleId: -1 }).limit(1);
+    const lastId = lastSale ? parseInt(lastSale.saleId.replace('S', ''), 10) : 0;
+    const newId = `S${(lastId + 1).toString().padStart(3, '0')}`;
+    return newId;
+};
+
+exports.createSalesBatch = async (req, res) => {
+  const salesList = req.body;
+  if (!Array.isArray(salesList)) {
+    return res.status(400).json({ message: 'Expected an array of sales' });
+  }
+
+  const created = [];
+  const skipped = [];
+
+  for (const sale of salesList) {
+    const {  vehicleId, rentalPeriod, totalAmount, paymentStatus } = sale;
+
+    // Ensure all required fields are provided
+    if ( !vehicleId || !rentalPeriod || !totalAmount || !paymentStatus) {
+      skipped.push({ reason: 'Missing required fields', sale });
+      continue;
+    }
+
+    const exists = await VehicleSale.findOne({  vehicleId, rentalPeriod, totalAmount });
+    if (exists) {
+      skipped.push({ reason: 'Duplicate sale', sale });
+      continue;
+    }
+
+    const saleId = await generateSaleId();
+    const newSale = new VehicleSale({
+      saleId,
+      
+      vehicleId,
+      rentalPeriod,
+      totalAmount,
+      paymentStatus
+    });
+
+    await newSale.save();
+    created.push(newSale);
+  }
+
+  res.status(207).json({
+    message: 'Batch processed',
+    createdCount: created.length,
+    skippedCount: skipped.length,
+    created,
+    skipped,
+  });
+};
+
+// Create a new Vehicle Sale
 exports.createSale = async (req, res) => {
     try {
-        const { vehicleId, customerId, rentalPeriod, totalAmount, paymentStatus } = req.body;
-
-        if (!vehicleId || !customerId || !rentalPeriod || !totalAmount || !paymentStatus) {
-            return res.status(400).json({ message: 'All fields are required' });
+        const {  vehicleId, rentalPeriod, totalAmount, paymentStatus } = req.body;
+        
+        // Generate new Sale ID
+        const saleId = await generateSaleId();
+        
+        // Check if all required fields are present
+        if ( !vehicleId || !rentalPeriod || !totalAmount || !paymentStatus) {
+            return res.status(400).json({ message: 'Missing required fields' });
         }
 
-        const newSale = new Sale({ vehicleId, customerId, rentalPeriod, totalAmount, paymentStatus });
+        const newSale = new VehicleSale({ 
+            saleId, 
+             
+            vehicleId, 
+            rentalPeriod, 
+            totalAmount, 
+            paymentStatus
+        });
+
         await newSale.save();
 
-        res.status(201).json({ message: 'Sale recorded successfully', sale: newSale });
+        res.status(201).json({ message: 'Sale created successfully', sale: newSale });
     } catch (error) {
-        res.status(500).json({ message: 'Error creating sale', error });
+        res.status(500).json({ message: 'Error creating sale', error: error.message });
     }
 };
 
-// Get all sales
+// Get all Vehicle Sales
 exports.getAllSales = async (req, res) => {
     try {
-        const sales = await Sale.find().populate('vehicleId customerId');
+        const sales = await VehicleSale.find();
         res.status(200).json(sales);
     } catch (error) {
-        res.status(500).json({ message: 'Error retrieving sales', error });
+        res.status(500).json({ message: 'Error retrieving sales', error: error.message });
     }
 };
 
-// Get a sale by ID
+// Get a single Vehicle Sale by ID
 exports.getSaleById = async (req, res) => {
-    try {
-        const sale = await Sale.findById(req.params.id).populate('vehicleId customerId');
-        if (!sale) return res.status(404).json({ message: 'Sale not found' });
+    const id = req.params.id;
 
+    try {
+        const sale = await VehicleSale.findById(id);
+        if (!sale) {
+            return res.status(404).json({ message: 'Sale not found' });
+        }
         res.status(200).json(sale);
     } catch (error) {
-        res.status(500).json({ message: 'Error retrieving sale', error });
+        res.status(500).json({ message: 'Error retrieving sale', error: error.message });
     }
 };
 
-// Update sale details (e.g., payment status)
+// Update a Vehicle Sale by ID
 exports.updateSale = async (req, res) => {
+    const id = req.params.id;
+    const {  vehicleId, rentalPeriod, totalAmount, paymentStatus } = req.body;
+
     try {
-        const updatedSale = await Sale.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!updatedSale) return res.status(404).json({ message: 'Sale not found' });
+        const updatedSale = await VehicleSale.findByIdAndUpdate(
+            id,
+            {  vehicleId, rentalPeriod, totalAmount, paymentStatus },
+            { new: true, runValidators: true } // Return the updated sale, validate inputs
+        );
+
+        if (!updatedSale) {
+            return res.status(404).json({ message: 'Sale not found' });
+        }
 
         res.status(200).json({ message: 'Sale updated successfully', sale: updatedSale });
     } catch (error) {
-        res.status(500).json({ message: 'Error updating sale', error });
+        res.status(500).json({ message: 'Error updating sale', error: error.message });
     }
 };
 
-// Delete a sale record
+// Delete a Vehicle Sale by ID
 exports.deleteSale = async (req, res) => {
+    const id = req.params.id;
+
+    // Convert ID to ObjectId if necessary
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid Sale ID' });
+    }
+
     try {
-        const deletedSale = await Sale.findByIdAndDelete(req.params.id);
-        if (!deletedSale) return res.status(404).json({ message: 'Sale not found' });
+        const deletedSale = await VehicleSale.findByIdAndDelete(id);
+        if (!deletedSale) {
+            return res.status(404).json({ message: 'Sale not found' });
+        }
 
         res.status(200).json({ message: 'Sale deleted successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Error deleting sale', error });
+        res.status(500).json({ message: 'Error deleting sale', error: error.message });
     }
 };
