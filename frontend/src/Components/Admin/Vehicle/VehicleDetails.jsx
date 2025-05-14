@@ -130,13 +130,14 @@ const VehicleDetails = () => {
 
     const handleUpdateSubmit = async () => {
         try {
+            const updatedVehicle = { ...selectedVehicle }; // Clone the selectedVehicle object
             const response = await axios.put(
-                `http://localhost:4000/vehicles/${selectedVehicle.vehicleId}`,
-                selectedVehicle
+                `http://localhost:4000/vehicles/${updatedVehicle.vehicleId}`,
+                updatedVehicle
             );
             setVehicles((prevVehicles) =>
                 prevVehicles.map((vehicle) =>
-                    vehicle.vehicleId === selectedVehicle.vehicleId ? response.data : vehicle
+                    vehicle.vehicleId === updatedVehicle.vehicleId ? response.data : vehicle
                 )
             );
             setUpdateDialogOpen(false);

@@ -215,7 +215,7 @@ function UserDetails() {
               sx={{ borderRadius: 2, marginLeft: 2 }}
               startIcon={<Add />}
             >
-              Add Owner
+              Add Admin
             </Button>
           </Box>
 

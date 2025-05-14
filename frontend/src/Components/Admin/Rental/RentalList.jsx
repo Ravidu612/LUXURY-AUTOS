@@ -5,6 +5,8 @@ import {
   Select, MenuItem, InputAdornment, IconButton, Typography
 } from "@mui/material";
 import { Add, Edit, Delete, Download, Search } from "@mui/icons-material";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const RentalList = () => {
   const [sales, setSales] = useState([]);
@@ -77,6 +79,29 @@ const RentalList = () => {
     }
   };
 
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Rental List", 14, 10);
+
+    doc.autoTable({
+      head: [["Rental ID", "Vehicle ID", "Rental Period", "Total Amount", "Payment Status"]],
+      body: sales.map((sale) => [
+        sale.saleId,
+        sale.vehicleId,
+        `${sale.rentalPeriod} days`,
+        sale.totalAmount,
+        sale.paymentStatus,
+      ]),
+      styles: { fillColor: [240, 240, 240] },
+      headStyles: { fillColor: [41, 128, 185], textColor: [255, 255, 255] },
+      alternateRowStyles: { fillColor: [220, 220, 220] },
+    });
+
+    doc.save("RentalList.pdf");
+  };
+
   const filteredSales = sales.filter((sale) => {
     const searchLower = searchQuery.toLowerCase();
     return (
@@ -119,6 +144,14 @@ const RentalList = () => {
           <MenuItem value="Pending">⏳ Pending</MenuItem>
           <MenuItem value="Cancelled">❌ Cancelled</MenuItem>
         </Select>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<Download />}
+          onClick={generatePDF}
+        >
+          Download PDF
+        </Button>
       </div>
 
       <TableContainer component={Paper} elevation={3}>
@@ -158,7 +191,6 @@ const RentalList = () => {
                 <TableCell>
                   <IconButton color="primary" onClick={() => handleOpenEditDialog(sale)}><Edit /></IconButton>
                   <IconButton color="error" onClick={() => handleDeleteRental(sale._id)}><Delete /></IconButton>
-                  <IconButton color="primary"><Download /></IconButton>
                 </TableCell>
               </TableRow>
             ))}

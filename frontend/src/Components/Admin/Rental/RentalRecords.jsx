@@ -51,7 +51,6 @@ const RentalRecords = () => {
     return vehicle ? vehicle.type : "Unknown";
   };
 
-
   const handleOpenAddDialog = () => {
     setCurrentSale({
       saleId: `B00${sales.length + 1}`,
@@ -70,16 +69,15 @@ const RentalRecords = () => {
     setOpenDialog(true);
   };
 
-  const filteredSales = sales.filter((sale) => {
+  const filteredSales = sales.filter((sale, index) => {
     const searchLower = searchQuery.toLowerCase();
+    sale.rentalId = index < 9 ? `R00${index + 1}` : `R0${index + 1}`;
     return (
-      (sale.customerId.toLowerCase().includes(searchLower) ||
-        sale.vehicleId.toLowerCase().includes(searchLower) ||
-        sale.pickUpLocation.toLowerCase().includes(searchLower)) &&
-      (filterpaymentStatus
-        === "" || sale.paymentStatus
-        === filterpaymentStatus
-      )
+      (sale.rentalId.toLowerCase().includes(searchLower) || // Auto-search for rental ID
+        (sale.customerId && sale.customerId.toLowerCase().includes(searchLower)) ||
+        (sale.vehicleId && sale.vehicleId.toLowerCase().includes(searchLower)) ||
+        (sale.pickUpLocation && sale.pickUpLocation.toLowerCase().includes(searchLower))) &&
+      (filterpaymentStatus === "" || sale.paymentStatus === filterpaymentStatus)
     );
   });
 
@@ -108,6 +106,36 @@ const RentalRecords = () => {
     }
   };
 
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Rental Records", 14, 10);
+
+    doc.autoTable({
+      head: [["Rental ID", "Vehicle ID", "Type", "Rental Period", "Price"]],
+      body: filteredSales
+        .sort((a, b) => a.rentalId.localeCompare(b.rentalId)) // Sort by Rental ID
+        .map((sale, index) => {
+          const vehicleType = getVehicleType(sale.vehicleId);
+          const rentalPeriod = `${Math.ceil((new Date(sale.dateTo) - new Date(sale.dateFrom)) / (1000 * 60 * 60 * 24))} days`;
+          const price = calculatePrice(vehicleType, Math.ceil((new Date(sale.dateTo) - new Date(sale.dateFrom)) / (1000 * 60 * 60 * 24)));
+          return [
+            index < 9 ? `R00${index + 1}` : `R0${index + 1}`,
+            sale.vehicleId,
+            vehicleType,
+            rentalPeriod,
+            price,
+          ];
+        }),
+      styles: { fillColor: [240, 240, 240] }, // Light gray background for rows
+      headStyles: { fillColor: [41, 128, 185], textColor: [255, 255, 255] }, // Blue header with white text
+      alternateRowStyles: { fillColor: [220, 220, 220] }, // Alternate row color
+    });
+
+    doc.save("RentalRecords.pdf");
+  };
+
   return (
     <div style={{ padding: "24px", backgroundColor: "#f4f6f8", minHeight: "100vh" }}>
       <Typography variant="h4" fontWeight="bold" gutterBottom>
@@ -115,7 +143,31 @@ const RentalRecords = () => {
       </Typography>
 
       <div style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
-        
+        <TextField
+          label="Search"
+          variant="outlined"
+          size="small"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton>
+                  <Search />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          style={{ flex: 1, maxWidth: "300px" }}
+        />
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<Download />}
+          onClick={generatePDF}
+        >
+          Download PDF
+        </Button>
       </div>
 
       <TableContainer component={Paper} elevation={3}>
@@ -138,12 +190,12 @@ const RentalRecords = () => {
                 vehicleType: vehicleType,
                 rentalPeriod: `${Math.ceil((new Date(sale.dateTo) - new Date(sale.dateFrom)) / (1000 * 60 * 60 * 24))}`,
                 totalAmount: calculatePrice(vehicleType, Math.ceil((new Date(sale.dateTo) - new Date(sale.dateFrom)) / (1000 * 60 * 60 * 24))),
-                paymentStatus: sale.status, // Renamed to avoid using deprecated 'status'
+                paymentStatus: sale.status,
               };
 
               return (
                 <TableRow key={sale.saleId || index} hover>
-                  <TableCell>{index < 9 ? `R00${index + 1}` : `R0${index + 1}`}</TableCell>
+                  <TableCell>{sale.rentalId}</TableCell>
                   <TableCell>{sale.vehicleId}</TableCell>
                   <TableCell>{vehicleType}</TableCell>
                   <TableCell>
@@ -153,7 +205,6 @@ const RentalRecords = () => {
                     {calculatePrice(vehicleType, Math.ceil((new Date(sale.dateTo) - new Date(sale.dateFrom)) / (1000 * 60 * 60 * 24)))}
                   </TableCell>
                   <TableCell>
-                    {/* Button to save sale data */}
                     <IconButton color="secondary" onClick={() => saveSaleData(saleData)}>
                       <span
                         style={{
@@ -169,8 +220,8 @@ const RentalRecords = () => {
                         }}
                       >
                         Approve
-                      </span>                    
-                      </IconButton>
+                      </span>
+                    </IconButton>
                   </TableCell>
                 </TableRow>
               );
