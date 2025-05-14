@@ -29,37 +29,40 @@ const VehiclePDF = ({ vehicle }) => (
     <Document>
         <Page style={styles.page}>
             <View style={{ ...styles.section, alignItems: "center" }}>
-                <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>
+                <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10, color: "blue" }}>
                     Vehicle Details
                 </Text>
             </View>
-            <View style={styles.section}>
-                <Text style={{ fontSize: 16, fontWeight: "bold" }}>Vehicle Name:</Text>
-                <Text style={{ fontSize: 14 }}>{vehicle.name}</Text>
-            </View>
-            <View style={styles.section}>
-                <Text style={{ fontSize: 16, fontWeight: "bold" }}>Type:</Text>
-                <Text style={{ fontSize: 14 }}>{vehicle.type}</Text>
-            </View>
-            <View style={styles.section}>
-                <Text style={{ fontSize: 16, fontWeight: "bold" }}>Fuel:</Text>
-                <Text style={{ fontSize: 14 }}>{vehicle.fuel}</Text>
-            </View>
-            <View style={styles.section}>
-                <Text style={{ fontSize: 16, fontWeight: "bold" }}>Seats:</Text>
-                <Text style={{ fontSize: 14 }}>{vehicle.seats}</Text>
-            </View>
-            <View style={styles.section}>
-                <Text style={{ fontSize: 16, fontWeight: "bold" }}>Transmission:</Text>
-                <Text style={{ fontSize: 14 }}>{vehicle.transmission}</Text>
-            </View>
-            <View style={styles.section}>
-                <Text style={{ fontSize: 16, fontWeight: "bold" }}>Price:</Text>
-                <Text style={{ fontSize: 14 }}>${vehicle.price}</Text>
-            </View>
-            <View style={styles.section}>
-                <Text style={{ fontSize: 16, fontWeight: "bold" }}>Status:</Text>
-                <Text style={{ fontSize: 14 }}>{vehicle.status}</Text>
+            <View style={{ borderWidth: 1, borderColor: "black", marginBottom: 10 }}>
+                <View style={{ flexDirection: "row", borderBottomWidth: 1, borderColor: "black" }}>
+                    <Text style={{ fontSize: 16, fontWeight: "bold", color: "blue", width: "50%", padding: 5 }}>
+                        Field
+                    </Text>
+                    <Text style={{ fontSize: 16, fontWeight: "bold", color: "blue", width: "50%", padding: 5 }}>
+                        Value
+                    </Text>
+                </View>
+                {[
+                    { label: "Vehicle Name", value: vehicle.name },
+                    { label: "Type", value: vehicle.type },
+                    { label: "Fuel", value: vehicle.fuel },
+                    { label: "Seats", value: vehicle.seats },
+                    { label: "Transmission", value: vehicle.transmission },
+                    { label: "Price", value: `$${vehicle.price}` },
+                    { label: "Status", value: vehicle.status },
+                ].map((item, index) => (
+                    <View
+                        key={index}
+                        style={{
+                            flexDirection: "row",
+                            borderBottomWidth: index === 6 ? 0 : 1,
+                            borderColor: "black",
+                        }}
+                    >
+                        <Text style={{ fontSize: 14, width: "50%", padding: 5 }}>{item.label}</Text>
+                        <Text style={{ fontSize: 14, width: "50%", padding: 5 }}>{item.value}</Text>
+                    </View>
+                ))}
             </View>
         </Page>
     </Document>
@@ -114,8 +117,10 @@ const VehicleDetails = () => {
     };
 
     const handleOpenUpdateDialog = (vehicle) => {
-        setSelectedVehicle(vehicle);
-        setUpdateDialogOpen(true);
+        if (window.confirm("Do you want to update this vehicle?")) {
+            setSelectedVehicle(vehicle);
+            setUpdateDialogOpen(true);
+        }
     };
 
     const handleUpdateChange = (e) => {
