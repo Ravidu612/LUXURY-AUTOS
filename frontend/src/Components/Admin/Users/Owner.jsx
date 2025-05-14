@@ -43,6 +43,9 @@ function Owner() {
   };
 
   const deleteUser = async (userId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this user?");
+    if (!confirmDelete) return;
+
     try {
       const response = await axios.delete(`${URL}/${userId}`);
       if (response.status === 200) {

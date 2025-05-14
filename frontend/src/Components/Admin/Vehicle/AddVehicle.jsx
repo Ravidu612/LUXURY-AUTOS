@@ -15,7 +15,13 @@ function AddVehicle({ onBack }) {
     transmission: '',
     price: '',
     status: 'available',
-    });
+  });
+
+  useEffect(() => {
+    if (vehicle.name && vehicle.type && vehicle.fuel && vehicle.seats && vehicle.transmission && vehicle.price) {
+      alert('Vehicle added successfully');
+    }
+  }, [vehicle]);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
