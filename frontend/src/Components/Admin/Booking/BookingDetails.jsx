@@ -89,6 +89,7 @@ const BookingDetails = () => {
     try {
       if (currentBooking.bookingId.startsWith("B00")) {
         // Create new booking
+        alert("Booking added successfully!");
         const response = await fetch("http://localhost:4000/vehiclebookings", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -130,10 +131,35 @@ const BookingDetails = () => {
     );
   });
 
-  const handlePrintPDF = () => {
+  const handlePrintPDF = (booking) => {
     const doc = new jsPDF();
-    doc.text("Booking Details", 14, 10);
+
+    // Add bold title with styling
+    doc.setFontSize(18);
+    doc.setTextColor(40, 40, 40);
+    doc.setFont("helvetica", "bold");
+    doc.text("Booking Details", 14, 20);
+
+    // Add a colored rectangle as a header background
+    doc.setFillColor(230, 230, 250); // Light lavender color
+    doc.rect(10, 25, 190, 10, "F");
+
+    // Add table with custom styles
     doc.autoTable({
+      startY: 40,
+      headStyles: {
+        fillColor: [63, 81, 181], // Indigo color
+        textColor: [255, 255, 255], // White text
+        fontSize: 12,
+        halign: "center",
+      },
+      bodyStyles: {
+        fontSize: 10,
+        halign: "center",
+      },
+      alternateRowStyles: {
+        fillColor: [240, 240, 240], // Light gray for alternate rows
+      },
       head: [
         [
           "Booking ID",
@@ -145,17 +171,21 @@ const BookingDetails = () => {
           "Date To",
         ],
       ],
-      body: bookings.map((booking) => [
-        booking.bookingId,
-        booking.customerId,
-        booking.vehicleId,
-        booking.pickUpLocation,
-        booking.status,
-        booking.dateFrom,
-        booking.dateTo,
-      ]),
+      body: [
+        [
+          booking.bookingId,
+          booking.customerId,
+          booking.vehicleId,
+          booking.pickUpLocation,
+          booking.status,
+          new Date(booking.dateFrom).toLocaleString(),
+          new Date(booking.dateTo).toLocaleString(),
+        ],
+      ],
     });
-    doc.save("booking_details.pdf");
+
+    // Save the PDF with a descriptive filename
+    doc.save(`Booking_${booking.bookingId}.pdf`);
   };
 
   return (

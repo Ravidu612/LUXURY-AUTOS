@@ -57,7 +57,7 @@ export default class Dashboard extends Component {
   // Fetch the booking count from the server
   fetchBookingCount = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/bookings'); // Ensure this points to your bookings endpoint
+      const response = await axios.get('http://localhost:4000/vehiclebookings'); // Ensure this points to your bookings endpoint
       this.setState({ bookingCount: response.data.length });
     } catch (error) {
       console.error("Error fetching booking count:", error);

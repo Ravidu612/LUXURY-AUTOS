@@ -15,6 +15,7 @@ const bookingRoutes = require('./Routes/BookingRoutes');
 const promotionRoutes = require('./Routes/PromotionRoutes');
 const authRoutes = require('./Routes/AuthRoutes');
 const salesRoutes = require('./Routes/SalesRoutes'); 
+const router = require('./router'); // Assuming this is the correct path to your router
 
 // Middleware
 app.use(express.json());
@@ -30,6 +31,7 @@ app.use('/vehiclebookings', bookingRoutes);
 app.use('/auth', authRoutes);
 app.use('/payments', paymentRoutes); // Prefixing all payment routes with `/payments`
 app.use('/sales', salesRoutes); // Prefix for sales routes
+app.use('/api', router);
 
 
 // Serve static files (uploaded images)

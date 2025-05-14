@@ -28,8 +28,6 @@ function Navbar() {
           <Box sx={{ display: 'flex', gap: '20px' }}>
             <Button component={Link} to="/" sx={{ color: '#161516', fontWeight: '500' }}>Home</Button>
             <Button component={Link} to="/Vehicles" sx={{ color: '#161516', fontWeight: '500' }}>Vehicle</Button>
-            <Button component={Link} to="/Book" sx={{ color: '#161516', fontWeight: '500' }}>Book </Button>
-            <Button component={Link} to="/Buy" sx={{ color: '#161516', fontWeight: '500' }}>payment</Button>
             <Button component={Link} to="/About" sx={{ color: '#161516', fontWeight: '500' }}>About Us</Button>
             <Button component={Link} to="/Contact" sx={{ color: '#161516', fontWeight: '500' }}>Contact</Button>
           </Box>
