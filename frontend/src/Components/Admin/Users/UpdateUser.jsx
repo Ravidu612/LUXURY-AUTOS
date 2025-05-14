@@ -73,7 +73,7 @@ function UpdateUser() {
       console.log('Update Payload:', user); // Check the payload
       await axios.put(`${URL}/${id}`, user);
       alert('User updated successfully');
-      navigate('/admindashboard/user-management'); // Redirect to the user management page
+      navigate('/user-list/user-management'); // Redirect to the user management page
     } catch (error) {
       console.error("Error updating user:", error);
       alert('Error updating user');

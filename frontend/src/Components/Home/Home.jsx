@@ -49,7 +49,7 @@ function Home() {
           color: 'white',
         }}>
           <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 2 }}>
-            Affordable <span style={{ color: 'yellow' }}>SRI LANKA RENT A CAR</span>
+            Luxury Autos <span style={{ color: 'yellow' }}>SRI LANKA RENT A CAR</span>
           </Typography>
           <Button
             variant="contained"
@@ -81,7 +81,7 @@ function Home() {
         </Typography>
         <Typography sx={{ color: '#333', fontSize: '1rem', lineHeight: 1.8 }}>
           <b>Luxury Autos</b> is a locally owned and operated car rental company in Sri Lanka that provides affordable options for all travelers.
-          The Luxury Autos team has been welcoming visitors from all over the world since 2022. We understand what our clients expect and deliver because we know what it's like to be a consumer.
+          The Luxury Autos team has been welcoming visitors from all over the world since 2015. We understand what our clients expect and deliver because we know what it's like to be a consumer.
           <br /><br />
           Our new fleets of vehicles are maintained to the highest standard, ensuring cleanliness & reliability. We take safety very seriously, making it easier for you to relax and enjoy a family vacation.
           From a fleet of more than 500 vehicles, you can find the perfect match between budget and luxury from well-known brands.
@@ -103,8 +103,8 @@ function Home() {
         }}
       >
         {[
-          { number: '15', label: 'AWARDS' },
-          { number: '20', label: 'YEARS OF EXPERIENCED' },
+          { number: '5', label: 'AWARDS' },
+          { number: '10', label: 'YEARS OF EXPERIENCED' },
           { number: '500', label: 'VEHICLES' },
           { number: '560', label: 'CHAUFFEURS' },
           { number: '45,000', label: 'HAPPY CUSTOMERS ANNUALLY' },
@@ -140,13 +140,13 @@ function Home() {
             {
               title: 'Rent A Car',
               description:
-                'SR Rent A Car is an independent car rental company in Sri Lanka since 2004. We offer luxurious customer service for you at the most affordable rental car rates.',
+                'Luxury Auto A Car is an independent car rental company in Sri Lanka since 2004. We offer luxurious customer service for you at the most affordable rental car rates.',
               image: '../Images/rentacar.png', // Replace with actual image path
             },
             {
               title: 'Airport Transfer',
               description:
-                'SR Rent A Car offers chauffeur-driven Airport Transfer and Hotel Transfer in Sri Lanka. We offer our service for Colombo International Airport & all hotels in Sri Lanka.',
+                'Luxury Auto A Car offers chauffeur-driven Airport Transfer and Hotel Transfer in Sri Lanka. We offer our service for Colombo International Airport & all hotels in Sri Lanka.',
               image: '../Images/transfer.png', // Replace with actual image path
             },
             {

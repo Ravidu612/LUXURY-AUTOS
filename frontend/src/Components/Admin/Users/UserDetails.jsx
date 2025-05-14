@@ -58,13 +58,15 @@ function UserDetails() {
 
   const handlePDF = () => {
     const doc = new jsPDF();
-    
+
     // Add the main topic as the title
     doc.setFontSize(18);
+    doc.setTextColor(40, 116, 240); // Set title color
     doc.text("LUXURY AUTOS", 10, 10);
-    
+
     // Add a subtitle or description if needed
     doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0); // Set subtitle color
     doc.text("User Details Report", 10, 20);
 
     doc.autoTable({
@@ -75,10 +77,16 @@ function UserDetails() {
       styles: {
         overflow: 'linebreak',
         fontSize: 10,
+        fillColor: [240, 240, 240], // Light gray background for rows
+        textColor: [0, 0, 0], // Black text color
       },
       headStyles: {
-        fillColor: [0, 0, 0],
-        textColor: [255, 255, 255],
+        fillColor: [40, 116, 240], // Blue background for header
+        textColor: [255, 255, 255], // White text color for header
+        fontSize: 12,
+      },
+      alternateRowStyles: {
+        fillColor: [220, 220, 220], // Light gray for alternate rows
       },
     });
 
@@ -207,7 +215,7 @@ function UserDetails() {
               sx={{ borderRadius: 2, marginLeft: 2 }}
               startIcon={<Add />}
             >
-              Add Owner
+              Add Admin
             </Button>
           </Box>
 
