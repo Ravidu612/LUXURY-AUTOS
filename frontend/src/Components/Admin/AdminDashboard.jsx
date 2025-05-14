@@ -24,7 +24,9 @@ function AdminDashboard() {
     { text: 'Users Management', icon: <PeopleIcon />, path: '/user-list/user-management' },
     { text: 'Vehicle Management', icon: <DashboardIcon />, path: '/admindashboard/Vehicle-management' },
     { text: 'Booking Management', icon: <ConfirmationNumberIcon />, path: '/admindashboard/booking-management' },
-    { text: 'Rental Management', icon: <ConfirmationNumberIcon />, path: '/admindashboard/rental' },
+    { text: 'Approve Rental', icon: <ConfirmationNumberIcon />, path: '/admindashboard/rental' },
+    { text: 'Rental Management', icon: <ConfirmationNumberIcon />, path: '/admindashboard/rental-list' },
+
   ];
   useEffect(() => {
     const timer = setTimeout(() => {

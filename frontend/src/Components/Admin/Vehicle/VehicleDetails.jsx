@@ -265,6 +265,7 @@ const VehicleDetails = () => {
                             <CardContent>
                                 <Typography variant="h6">{vehicle.name}</Typography>
                                 <Typography color="textSecondary">{vehicle.type}</Typography>
+                                <Typography variant="body2">Vehicle ID: {vehicle.vehicleId}</Typography>
                                 <Typography variant="body2">Fuel: {vehicle.fuel}</Typography>
                                 <Typography variant="body2">Seats: {vehicle.seats}</Typography>
                                 <Typography variant="body2">Transmission: {vehicle.transmission}</Typography>

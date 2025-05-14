@@ -1,319 +1,185 @@
-import React, { useState } from 'react';
-import { Button, Container, Typography, Grid, Box, Dialog, DialogTitle, DialogActions, DialogContent, TextField, Paper, List as MuiList, ListItem, ListItemText, IconButton } from '@mui/material';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import UnarchiveIcon from '@mui/icons-material/Unarchive';
-import EditIcon from '@mui/icons-material/Edit';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import { MenuItem } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import { RentalData } from '../Database/Data';
+import React, { useState, useEffect } from "react";
+import {
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
+  Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField,
+  Select, MenuItem, InputAdornment, IconButton, Typography
+} from "@mui/material";
+import { Add, Edit, Delete, Download, Upload, Search } from "@mui/icons-material";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
-function Rental() {
-    const [rentals, setRentals] = useState(RentalData);
-    const [openDialog, setOpenDialog] = useState(false);
-    const [openModifyDialog, setOpenModifyDialog] = useState(false);
-    const [openNewTransactionDialog, setOpenNewTransactionDialog] = useState(false);
-    const [selectedRental, setSelectedRental] = useState(null);
+const RentalRecords = () => {
+  const [sales, setSales] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterpaymentStatus, setFilterpaymentStatus] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [vehicles, setVehicles] = useState([]);
 
-    const [searchQuery, setSearchQuery] = useState('');
-    const [filterStatus, setFilterStatus] = useState('All');
+  useEffect(() => {
+    fetchSales();
+    fetchVehicles();
+  }, []);
 
-    const filteredRentals = rentals.filter((rental) =>
-        rental.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        (filterStatus === "All" || rental.status === filterStatus)
-    );
+  const fetchSales = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/vehiclebookings");
+      if (!response.ok) {
+        throw new Error("Failed to fetch sales");
+      }
+      const data = await response.json();
+      setSales(data);
+    } catch (error) {
+      console.error("Error fetching sales:", error);
+    }
+  };
 
-    // State for new rental form
-    const [newRental, setNewRental] = useState({
-        name: "",
-        location: "",
-        price: "",
-        status: "Active",
+  const fetchVehicles = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/vehicles");
+      if (!response.ok) {
+        throw new Error("Failed to fetch vehicles");
+      }
+      const data = await response.json();
+      setVehicles(data);
+    } catch (error) {
+      console.error("Error fetching vehicles:", error);
+    }
+  };
+
+  const getVehicleType = (vehicleId) => {
+    const vehicle = vehicles.find((v) => v.vehicleId === vehicleId);
+    return vehicle ? vehicle.type : "Unknown";
+  };
+
+
+  const handleOpenAddDialog = () => {
+    setCurrentSale({
+      saleId: `B00${sales.length + 1}`,
+      vehicleId: "",
+      paymentStatus: "",
+      dateFrom: "",
+      dateTo: "",
+      customerId: "",
+      pickUpLocation: "",
     });
+    setOpenAddDialog(true);
+  };
 
-    const handleOpenNewTransaction = () => {
-        setOpenNewTransactionDialog(true);
-    };
+  const handleOpenDialog = (sale) => {
+    setCurrentSale(sale);
+    setOpenDialog(true);
+  };
 
-    const handleCloseNewTransaction = () => {
-        setOpenNewTransactionDialog(false);
-        setNewRental({ name: "", location: "", price: "", status: "Active" });
-    };
-
-    const handleSaveNewTransaction = () => {
-        if (!newRental.name || !newRental.location || !newRental.price) {
-            alert("Please fill in all fields!");
-            return;
-        }
-
-        const newRentalItem = {
-            id: rentals.length + 1,
-            ...newRental,
-            price: `$${newRental.price}`,
-        };
-
-        setRentals([...rentals, newRentalItem]);
-        handleCloseNewTransaction();
-    };
-
-    const handleViewTransaction = (rental) => {
-        setSelectedRental(rental);
-        setOpenDialog(true);
-    };
-
-    const handleModifyPayment = (rental) => {
-        setSelectedRental(rental);
-        setOpenModifyDialog(true);
-    };
-
-    const handleArchiveTransaction = (id) => {
-        setRentals(rentals.map((rental) => (rental.id === id ? { ...rental, status: "Archived" } : rental)));
-    };
-
-    const handleUnarchiveTransaction = (id) => {
-        setRentals(rentals.map((rental) => (rental.id === id ? { ...rental, status: "Active" } : rental)));
-    };
-
+  const filteredSales = sales.filter((sale) => {
+    const searchLower = searchQuery.toLowerCase();
     return (
-        <div style={{ padding: "10px", backgroundColor: "rgb(253, 253, 227)", minHeight: "100vh" }}>
-            <Container>
-                <Box textAlign="left" my={4}>
-                    <Button
-                        variant="contained"
-                        color="success"
-                        sx={{ px: 3, py: 1, borderRadius: 2, fontSize: "1rem", mx: 2, my: 1 }}
-                        onClick={handleOpenNewTransaction}
-                    >
-                        Add Rental
-                    </Button>
-                    <Button
-                        variant="contained"
-                        color="warning"
-                        sx={{ px: 3, py: 1, borderRadius: 2, fontSize: "1rem", mx: 2, my: 1 }}
-                        onClick={() => setFilterStatus('Archived')}
-                    >
-                        View Archive
-                    </Button>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        sx={{ px: 3, py: 1, borderRadius: 2, fontSize: "1rem", mx: 2, my: 1 }}
-                        onClick={() => setFilterStatus('All')}
-                    >
-                        View All
-                    </Button>
-                
-                    <TextField
-                        marginRight={2}
-                        variant="outlined"
-                        placeholder="Search Rental... "
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        InputProps={{
-                            startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />
-                        }}
-                        sx={{ mx: 2, my: 1 }}
-                    />
-                    <TextField
-                        select
-                        variant="outlined"
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                        sx={{ mx: 2, my: 1 }}
-                    >
-                        <MenuItem value="All">All</MenuItem>
-                        <MenuItem value="Active">Active</MenuItem>
-                        <MenuItem value="Completed">Completed</MenuItem>
-                        <MenuItem value="Archived">Archived</MenuItem>
-                        <MenuItem value="Pending">Pending</MenuItem>
-                    </TextField>
-                </Box>
-                <MuiList sx={{ width: "100%", maxWidth: 800, margin: "auto" }}>
-                    {filteredRentals.map((rental) => (
-                        <Paper
-                            key={rental.id}
-                            elevation={4}
-                            sx={{
-                                margin: "12px 0",
-                                padding: 2,
-                                borderRadius: 3,
-                                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                                transition: "transform 0.2s ease-in-out",
-                                "&:hover": { transform: "scale(1.02)" }
-                            }}
-                        >
-                            <Grid container spacing={2} alignItems="center">
-                                {/* Rental Details */}
-                                <Grid item xs={12} sm={8}>
-                                    <ListItemText
-                                        primary={
-                                            <Typography variant="h6" fontWeight="bold" color="info">
-                                                {rental.name}
-                                            </Typography>
-                                        }
-                                        secondary={
-                                            <>
-                                                <Typography
-                                                    variant="body2"
-                                                    color={rental.status === "Active" ? "success.main" : rental.status === "Completed" ? "info.main" : rental.status === "Archived" ? "warning.main" : rental.status === "Pending" ? "error.main" : "textSecondary"}
-                                                    fontWeight="bold"
-                                                >
-                                                    🔹 Status: {rental.status}
-                                                </Typography>
-                                            </>
-                                        }
-                                    />
-                                </Grid>
-
-                                {/* Action Buttons */}
-                                <Grid item xs={12} sm={4}>
-                                    <Box display="flex" justifyContent={{ xs: "center", sm: "flex-end" }} gap={1} flexWrap="wrap">
-                                        <IconButton color="primary" size="medium" onClick={() => handleViewTransaction(rental)}>
-                                            <VisibilityIcon />
-                                        </IconButton>
-                                        <IconButton color="secondary" size="medium" onClick={() => handleModifyPayment(rental)}>
-                                            <EditIcon />
-                                        </IconButton>
-                                        {rental.status !== "Archived" && (
-                                            <IconButton color="warning" size="medium" onClick={() => handleArchiveTransaction(rental.id)}>
-                                                <ArchiveIcon />
-                                            </IconButton>
-                                        )}
-                                        {rental.status === "Archived" && (
-                                            <IconButton color="success" size="medium" onClick={() => handleUnarchiveTransaction(rental.id)}>
-                                                <UnarchiveIcon />
-                                            </IconButton>
-                                        )}
-                                    </Box>
-                                </Grid>
-                            </Grid>
-                        </Paper>
-                    ))}
-                </MuiList>
-
-                {/* New Rental Dialog */}
-                <Dialog open={openNewTransactionDialog} onClose={handleCloseNewTransaction}>
-                    <DialogTitle>New Rental</DialogTitle>
-                    <DialogContent>
-                        <TextField
-                            fullWidth
-                            label="Name"
-                            value={newRental.name}
-                            onChange={(e) => setNewRental({ ...newRental, name: e.target.value })}
-                            margin="dense"
-                            variant="outlined"
-                        />
-                        <TextField
-                            fullWidth
-                            label="Location"
-                            value={newRental.location}
-                            onChange={(e) => setNewRental({ ...newRental, location: e.target.value })}
-                            margin="dense"
-                            variant="outlined"
-                        />
-                        <TextField
-                            fullWidth
-                            label="Price"
-                            type="number"
-                            value={newRental.price}
-                            onChange={(e) => setNewRental({ ...newRental, price: e.target.value })}
-                            margin="dense"
-                            variant="outlined"
-                        />
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleCloseNewTransaction} color="secondary">
-                            Cancel
-                        </Button>
-                        <Button onClick={handleSaveNewTransaction} color="primary">
-                            Save
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-
-                {/* View Rental Dialog */}
-                <Dialog open={openDialog} onClose={() => setOpenDialog(false)} >
-                    <DialogTitle>Rental Details</DialogTitle>
-                    <DialogContent>
-                        {selectedRental && (
-                            <>
-                                <Typography variant="body2" color="textSecondary" fontWeight="bold">📍 Location: {selectedRental.location}</Typography>
-                                <Typography variant="body2" color="textSecondary" fontWeight="bold">💲 Price: {selectedRental.price}</Typography>
-                                <Typography
-                                    variant="body2"
-                                    color={selectedRental.status === "Active" ? "success.main" : "textSecondary"}
-                                    fontWeight="bold"
-                                >
-                                    🔹 Status: {selectedRental.status}
-                                </Typography>
-                                <Typography variant="body2" color="textSecondary" fontWeight="bold"> 🔹 Property: {selectedRental.propertyID}</Typography>
-                                <Typography variant="body2" color="textSecondary" fontWeight="bold"> 🔹 Tenant: {selectedRental.tenantID}</Typography>
-                                <Typography variant="body2" color="textSecondary" fontWeight="bold"> 🔹 Landlord: {selectedRental.landlordID}</Typography>
-                            </>
-                        )}
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={() => setOpenDialog(false)} color="primary">
-                            Close
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-
-                {/* Modify Rental Dialog */}
-                <Dialog open={openModifyDialog} onClose={() => setOpenModifyDialog(false)}>
-                    <DialogTitle>Modify Rental Details</DialogTitle>
-                    <DialogContent>
-                        <TextField
-                            fullWidth
-                            label="Name"
-                            value={selectedRental?.name || ''}
-                            onChange={(e) => setSelectedRental({ ...selectedRental, name: e.target.value })}
-                            margin="dense"
-                            variant="outlined"
-                        />
-                        <TextField
-                            fullWidth
-                            label="Location"
-                            value={selectedRental?.location || ''}
-                            onChange={(e) => setSelectedRental({ ...selectedRental, location: e.target.value })}
-                            margin="dense"
-                            variant="outlined"
-                        />
-                        <TextField
-                            fullWidth
-                            label="Price"
-                            value={selectedRental?.price || ''}
-                            onChange={(e) => setSelectedRental({ ...selectedRental, price: e.target.value })}
-                            margin="dense"
-                            variant="outlined"
-                        />
-                        <TextField
-                            fullWidth
-                            label="Status"
-                            value={selectedRental?.status || ''}
-                            onChange={(e) => setSelectedRental({ ...selectedRental, status: e.target.value })}
-                            margin="dense"
-                            variant="outlined"
-                        />
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={() => setOpenModifyDialog(false)} color="secondary">
-                            Cancel
-                        </Button>
-                        <Button
-                            color="primary"
-                            onClick={() => {
-                                setRentals(rentals.map((rental) => (rental.id === selectedRental.id ? selectedRental : rental)));
-                                setOpenModifyDialog(false);
-                            }}
-                        >
-                            Save
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-            </Container>
-        </div>
+      (sale.customerId.toLowerCase().includes(searchLower) ||
+        sale.vehicleId.toLowerCase().includes(searchLower) ||
+        sale.pickUpLocation.toLowerCase().includes(searchLower)) &&
+      (filterpaymentStatus
+        === "" || sale.paymentStatus
+        === filterpaymentStatus
+      )
     );
-}
+  });
 
-export default Rental;
+  const calculatePrice = (vehicleType, period) => {
+    const prices = { Car: 15000, Luxury: 50000, Sedan: 25000 };
+    const total = prices[vehicleType] ? prices[vehicleType] * period : 0;
+    return total.toLocaleString("en-LK", { style: "currency", currency: "LKR" });
+  };
+
+  const saveSaleData = async (saleData) => {
+    try {
+      const response = await fetch("http://localhost:4000/sales", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(saleData),
+      });
+      if (response.ok) {
+        console.log("Data saved successfully");
+      } else {
+        console.error("Failed to save data");
+      }
+    } catch (error) {
+      console.error("Error saving data:", error);
+    }
+  };
+
+  return (
+    <div style={{ padding: "24px", backgroundColor: "#f4f6f8", minHeight: "100vh" }}>
+      <Typography variant="h4" fontWeight="bold" gutterBottom>
+        🚗 Approve Rentals
+      </Typography>
+
+      <div style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
+        
+      </div>
+
+      <TableContainer component={Paper} elevation={3}>
+        <Table>
+          <TableHead>
+            <TableRow style={{ backgroundColor: "#eeeeee" }}>
+              <TableCell><b>Rental ID</b></TableCell>
+              <TableCell><b>Vehicle ID</b></TableCell>
+              <TableCell><b>Type</b></TableCell>
+              <TableCell><b>Rental Period</b></TableCell>
+              <TableCell><b>Price</b></TableCell>
+              <TableCell><b>Actions</b></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredSales.map((sale, index) => {
+              const vehicleType = getVehicleType(sale.vehicleId);
+              const saleData = {
+                vehicleId: sale.vehicleId,
+                vehicleType: vehicleType,
+                rentalPeriod: `${Math.ceil((new Date(sale.dateTo) - new Date(sale.dateFrom)) / (1000 * 60 * 60 * 24))}`,
+                totalAmount: calculatePrice(vehicleType, Math.ceil((new Date(sale.dateTo) - new Date(sale.dateFrom)) / (1000 * 60 * 60 * 24))),
+                paymentStatus: sale.status, // Renamed to avoid using deprecated 'status'
+              };
+
+              return (
+                <TableRow key={sale.saleId || index} hover>
+                  <TableCell>{index < 9 ? `R00${index + 1}` : `R0${index + 1}`}</TableCell>
+                  <TableCell>{sale.vehicleId}</TableCell>
+                  <TableCell>{vehicleType}</TableCell>
+                  <TableCell>
+                    {`${Math.ceil((new Date(sale.dateTo) - new Date(sale.dateFrom)) / (1000 * 60 * 60 * 24))} days`}
+                  </TableCell>
+                  <TableCell>
+                    {calculatePrice(vehicleType, Math.ceil((new Date(sale.dateTo) - new Date(sale.dateFrom)) / (1000 * 60 * 60 * 24)))}
+                  </TableCell>
+                  <TableCell>
+                    {/* Button to save sale data */}
+                    <IconButton color="secondary" onClick={() => saveSaleData(saleData)}>
+                      <span
+                        style={{
+                          padding: "4px 8px",
+                          borderRadius: "4px",
+                          backgroundColor:
+                            sale.statuss === "Confirmed"
+                              ? "#4caf50"
+                              : sale.statuss === "Pending"
+                                ? "#ff9800"
+                                : "#f44336",
+                          color: "white",
+                        }}
+                      >
+                        Approve
+                      </span>                    
+                      </IconButton>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </div>
+  );
+};
+
+export default RentalRecords;
