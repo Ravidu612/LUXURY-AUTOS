@@ -51,25 +51,6 @@ const RentalRecords = () => {
     return vehicle ? vehicle.type : "Unknown";
   };
 
-
-  const handleOpenAddDialog = () => {
-    setCurrentSale({
-      saleId: `B00${sales.length + 1}`,
-      vehicleId: "",
-      paymentStatus: "",
-      dateFrom: "",
-      dateTo: "",
-      customerId: "",
-      pickUpLocation: "",
-    });
-    setOpenAddDialog(true);
-  };
-
-  const handleOpenDialog = (sale) => {
-    setCurrentSale(sale);
-    setOpenDialog(true);
-  };
-
   const filteredSales = sales.filter((sale) => {
     const searchLower = searchQuery.toLowerCase();
     return (
@@ -114,10 +95,6 @@ const RentalRecords = () => {
         🚗 Approve Rentals
       </Typography>
 
-      <div style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
-        
-      </div>
-
       <TableContainer component={Paper} elevation={3}>
         <Table>
           <TableHead>
@@ -142,7 +119,7 @@ const RentalRecords = () => {
               };
 
               return (
-                <TableRow key={sale.saleId || index} hover>
+                <TableRow key={sale.saleId || index} hover style={{ display: sale.hidden ? "none" : "table-row" }}>
                   <TableCell>{index < 9 ? `R00${index + 1}` : `R0${index + 1}`}</TableCell>
                   <TableCell>{sale.vehicleId}</TableCell>
                   <TableCell>{vehicleType}</TableCell>
@@ -154,23 +131,33 @@ const RentalRecords = () => {
                   </TableCell>
                   <TableCell>
                     {/* Button to save sale data */}
-                    <IconButton color="secondary" onClick={() => saveSaleData(saleData)}>
+                    <IconButton
+                      color="secondary"
+                      onClick={() => {
+                        saveSaleData(saleData);
+                        setSales((prevSales) =>
+                          prevSales.map((s) =>
+                            s.saleId === sale.saleId ? { ...s, hidden: true } : s
+                          )
+                        );
+                      }}
+                    >
                       <span
                         style={{
                           padding: "4px 8px",
                           borderRadius: "4px",
                           backgroundColor:
-                            sale.statuss === "Confirmed"
+                            sale.setFilterpaymentStatus === "Confirmed"
                               ? "#4caf50"
                               : sale.statuss === "Pending"
-                                ? "#ff9800"
-                                : "#f44336",
+                              ? "#ff9800"
+                              : "#f44336",
                           color: "white",
                         }}
                       >
                         Approve
-                      </span>                    
-                      </IconButton>
+                      </span>
+                    </IconButton>
                   </TableCell>
                 </TableRow>
               );

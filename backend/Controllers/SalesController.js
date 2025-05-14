@@ -4,8 +4,8 @@ const mongoose = require('mongoose');
 // Generate Sale ID with leading zeros
 const generateSaleId = async () => {
     const lastSale = await VehicleSale.findOne().sort({ saleId: -1 }).limit(1);
-    const lastId = lastSale ? parseInt(lastSale.saleId.replace('S', ''), 10) : 0;
-    const newId = `S${(lastId + 1).toString().padStart(3, '0')}`;
+    const lastId = lastSale ? parseInt(lastSale.saleId.replace('R', ''), 10) : 0;
+    const newId = `R${(lastId + 1).toString().padStart(3, '0')}`;
     return newId;
 };
 
