@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
   Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField,
-  Select, MenuItem, InputAdornment, IconButton, Typography
+  Select, MenuItem, InputAdornment, IconButton, Typography, DialogContentText
 } from "@mui/material";
 import { Add, Edit, Delete, Download, Search } from "@mui/icons-material";
 import jsPDF from "jspdf";
@@ -15,6 +15,8 @@ const RentalList = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedSale, setSelectedSale] = useState(null);
   const [newPaymentStatus, setNewPaymentStatus] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [rentalToDelete, setRentalToDelete] = useState(null);
 
   useEffect(() => {
     fetchSales();
@@ -33,15 +35,26 @@ const RentalList = () => {
     }
   };
 
-  const handleDeleteRental = async (id) => {
+  const handleOpenDeleteDialog = (id) => {
+    setRentalToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setRentalToDelete(null);
+  };
+
+  const confirmDeleteRental = async () => {
     try {
-      const response = await fetch(`http://localhost:4000/sales/${id}`, {
+      const response = await fetch(`http://localhost:4000/sales/${rentalToDelete}`, {
         method: "DELETE",
       });
       if (!response.ok) {
         throw new Error("Failed to delete rental");
       }
-      setSales(sales.filter((sale) => sale._id !== id));
+      setSales(sales.filter((sale) => sale._id !== rentalToDelete));
+      handleCloseDeleteDialog();
     } catch (error) {
       console.error("Error deleting rental:", error);
     }
@@ -190,7 +203,7 @@ const RentalList = () => {
                 </TableCell>
                 <TableCell>
                   <IconButton color="primary" onClick={() => handleOpenEditDialog(sale)}><Edit /></IconButton>
-                  <IconButton color="error" onClick={() => handleDeleteRental(sale._id)}><Delete /></IconButton>
+                  <IconButton color="error" onClick={() => handleOpenDeleteDialog(sale._id)}><Delete /></IconButton>
                 </TableCell>
               </TableRow>
             ))}
@@ -214,6 +227,19 @@ const RentalList = () => {
         <DialogActions>
           <Button onClick={handleCloseEditDialog} color="secondary">Cancel</Button>
           <Button onClick={handleUpdatePaymentStatus} color="primary">Save</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this rental? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="secondary">Cancel</Button>
+          <Button onClick={confirmDeleteRental} color="error">Delete</Button>
         </DialogActions>
       </Dialog>
     </div>
