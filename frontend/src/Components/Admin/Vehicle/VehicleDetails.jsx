@@ -322,7 +322,7 @@ const VehicleDetails = () => {
                                 }}
                                 margin="dense"
                                 type={field === "seats" || field === "price" ? "number" : "text"}
-                                select={field === "type" || field === "fuel"}
+                                select={field === "type" && field === "fuel"}
                             >
                                 {field === "type" && (
                                     <>
@@ -384,10 +384,12 @@ const VehicleDetails = () => {
                         onChange={handleChange}
                         select
                     >
+                        <MenuItem value="">All Fuel Types</MenuItem>
                         <MenuItem value="Petrol">Petrol</MenuItem>
                         <MenuItem value="Diesel">Diesel</MenuItem>
                         <MenuItem value="Electric">Electric</MenuItem>
-                       
+                        <MenuItem value="Hybrid">Hybrid</MenuItem>
+                        <MenuItem value="CNG">CNG</MenuItem>
                     </TextField>
                     <TextField
                         fullWidth
