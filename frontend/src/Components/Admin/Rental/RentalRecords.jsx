@@ -196,8 +196,6 @@ const RentalRecords = () => {
               return (
                 <TableRow key={sale.saleId || index} hover>
                   <TableCell>{sale.rentalId}</TableCell>
-                <TableRow key={sale.saleId || index} hover style={{ display: sale.hidden ? "none" : "table-row" }}>
-                  <TableCell>{index < 9 ? `R00${index + 1}` : `R0${index + 1}`}</TableCell>
                   <TableCell>{sale.vehicleId}</TableCell>
                   <TableCell>{vehicleType}</TableCell>
                   <TableCell>
@@ -207,6 +205,7 @@ const RentalRecords = () => {
                     {calculatePrice(vehicleType, Math.ceil((new Date(sale.dateTo) - new Date(sale.dateFrom)) / (1000 * 60 * 60 * 24)))}
                   </TableCell>
                   <TableCell>
+                    {/* Button to save sale data */}
                     <IconButton color="secondary" onClick={() => saveSaleData(saleData)}>
                       <span
                         style={{
