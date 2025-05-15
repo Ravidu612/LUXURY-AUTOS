@@ -196,6 +196,7 @@ const RentalRecords = () => {
                   <TableCell>{`${rentalDays} days`}</TableCell>
                   <TableCell>{calculatePrice(vehicleType, rentalDays)}</TableCell>
                   <TableCell>
+                    {/* Button to save sale data */}
                     <IconButton color="secondary" onClick={() => saveSaleData(saleData)}>
                       <span
                         style={{
