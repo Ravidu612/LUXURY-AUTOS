@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-  Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField,
-  Select, MenuItem, InputAdornment, IconButton, Typography
+  Button, TextField, InputAdornment, IconButton, Typography
 } from "@mui/material";
-import { Add, Edit, Delete, Download, Upload, Search } from "@mui/icons-material";
+import { Download, Search } from "@mui/icons-material";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 
@@ -12,7 +11,6 @@ const RentalRecords = () => {
   const [sales, setSales] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterpaymentStatus, setFilterpaymentStatus] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
   const [vehicles, setVehicles] = useState([]);
 
   useEffect(() => {
@@ -51,35 +49,21 @@ const RentalRecords = () => {
     return vehicle ? vehicle.type : "Unknown";
   };
 
-  const handleOpenAddDialog = () => {
-    setCurrentSale({
-      saleId: `B00${sales.length + 1}`,
-      vehicleId: "",
-      paymentStatus: "",
-      dateFrom: "",
-      dateTo: "",
-      customerId: "",
-      pickUpLocation: "",
+  const filteredSales = sales
+    .map((sale, index) => ({
+      ...sale,
+      rentalId: index < 9 ? `R00${index + 1}` : `R0${index + 1}`,
+    }))
+    .filter((sale) => {
+      const searchLower = searchQuery.toLowerCase();
+      return (
+        (sale.rentalId.toLowerCase().includes(searchLower) ||
+          (sale.customerId && sale.customerId.toLowerCase().includes(searchLower)) ||
+          (sale.vehicleId && sale.vehicleId.toLowerCase().includes(searchLower)) ||
+          (sale.pickUpLocation && sale.pickUpLocation.toLowerCase().includes(searchLower))) &&
+        (filterpaymentStatus === "" || sale.paymentStatus === filterpaymentStatus)
+      );
     });
-    setOpenAddDialog(true);
-  };
-
-  const handleOpenDialog = (sale) => {
-    setCurrentSale(sale);
-    setOpenDialog(true);
-  };
-
-  const filteredSales = sales.filter((sale, index) => {
-    const searchLower = searchQuery.toLowerCase();
-    sale.rentalId = index < 9 ? `R00${index + 1}` : `R0${index + 1}`;
-    return (
-      (sale.rentalId.toLowerCase().includes(searchLower) || // Auto-search for rental ID
-        (sale.customerId && sale.customerId.toLowerCase().includes(searchLower)) ||
-        (sale.vehicleId && sale.vehicleId.toLowerCase().includes(searchLower)) ||
-        (sale.pickUpLocation && sale.pickUpLocation.toLowerCase().includes(searchLower))) &&
-      (filterpaymentStatus === "" || sale.paymentStatus === filterpaymentStatus)
-    );
-  });
 
   const calculatePrice = (vehicleType, period) => {
     const prices = { Car: 15000, Luxury: 50000, Sedan: 25000 };
@@ -115,22 +99,25 @@ const RentalRecords = () => {
     doc.autoTable({
       head: [["Rental ID", "Vehicle ID", "Type", "Rental Period", "Price"]],
       body: filteredSales
-        .sort((a, b) => a.rentalId.localeCompare(b.rentalId)) // Sort by Rental ID
-        .map((sale, index) => {
+        .sort((a, b) => a.rentalId.localeCompare(b.rentalId))
+        .map((sale) => {
           const vehicleType = getVehicleType(sale.vehicleId);
-          const rentalPeriod = `${Math.ceil((new Date(sale.dateTo) - new Date(sale.dateFrom)) / (1000 * 60 * 60 * 24))} days`;
-          const price = calculatePrice(vehicleType, Math.ceil((new Date(sale.dateTo) - new Date(sale.dateFrom)) / (1000 * 60 * 60 * 24)));
+          const rentalDays = Math.ceil(
+            (new Date(sale.dateTo) - new Date(sale.dateFrom)) / (1000 * 60 * 60 * 24)
+          );
+          const rentalPeriod = `${rentalDays} days`;
+          const price = calculatePrice(vehicleType, rentalDays);
           return [
-            index < 9 ? `R00${index + 1}` : `R0${index + 1}`,
+            sale.rentalId,
             sale.vehicleId,
             vehicleType,
             rentalPeriod,
             price,
           ];
         }),
-      styles: { fillColor: [240, 240, 240] }, // Light gray background for rows
-      headStyles: { fillColor: [41, 128, 185], textColor: [255, 255, 255] }, // Blue header with white text
-      alternateRowStyles: { fillColor: [220, 220, 220] }, // Alternate row color
+      styles: { fillColor: [240, 240, 240] },
+      headStyles: { fillColor: [41, 128, 185], textColor: [255, 255, 255] },
+      alternateRowStyles: { fillColor: [220, 220, 220] },
     });
 
     doc.save("RentalRecords.pdf");
@@ -185,39 +172,36 @@ const RentalRecords = () => {
           <TableBody>
             {filteredSales.map((sale, index) => {
               const vehicleType = getVehicleType(sale.vehicleId);
+              const rentalDays = Math.ceil(
+                (new Date(sale.dateTo) - new Date(sale.dateFrom)) / (1000 * 60 * 60 * 24)
+              );
               const saleData = {
                 vehicleId: sale.vehicleId,
                 vehicleType: vehicleType,
-                rentalPeriod: `${Math.ceil((new Date(sale.dateTo) - new Date(sale.dateFrom)) / (1000 * 60 * 60 * 24))}`,
-                totalAmount: calculatePrice(vehicleType, Math.ceil((new Date(sale.dateTo) - new Date(sale.dateFrom)) / (1000 * 60 * 60 * 24))),
-                paymentStatus: sale.status,
+                rentalPeriod: `${rentalDays}`,
+                totalAmount: calculatePrice(vehicleType, rentalDays),
+                paymentStatus: sale.paymentStatus,
               };
+
+              // Status color logic
+              let bgColor = "#f44336";
+              if (sale.paymentStatus === "Confirmed") bgColor = "#4caf50";
+              else if (sale.paymentStatus === "Pending") bgColor = "#ff9800";
 
               return (
                 <TableRow key={sale.saleId || index} hover>
                   <TableCell>{sale.rentalId}</TableCell>
-                <TableRow key={sale.saleId || index} hover style={{ display: sale.hidden ? "none" : "table-row" }}>
-                  <TableCell>{index < 9 ? `R00${index + 1}` : `R0${index + 1}`}</TableCell>
                   <TableCell>{sale.vehicleId}</TableCell>
                   <TableCell>{vehicleType}</TableCell>
-                  <TableCell>
-                    {`${Math.ceil((new Date(sale.dateTo) - new Date(sale.dateFrom)) / (1000 * 60 * 60 * 24))} days`}
-                  </TableCell>
-                  <TableCell>
-                    {calculatePrice(vehicleType, Math.ceil((new Date(sale.dateTo) - new Date(sale.dateFrom)) / (1000 * 60 * 60 * 24)))}
-                  </TableCell>
+                  <TableCell>{`${rentalDays} days`}</TableCell>
+                  <TableCell>{calculatePrice(vehicleType, rentalDays)}</TableCell>
                   <TableCell>
                     <IconButton color="secondary" onClick={() => saveSaleData(saleData)}>
                       <span
                         style={{
                           padding: "4px 8px",
                           borderRadius: "4px",
-                          backgroundColor:
-                            sale.setFilterpaymentStatus === "Confirmed"
-                              ? "#4caf50"
-                              : sale.statuss === "Pending"
-                              ? "#ff9800"
-                              : "#f44336",
+                          backgroundColor: bgColor,
                           color: "white",
                         }}
                       >
